@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">test</string>
+    <string name="create_a_new_account">Create a New Account</string>
+    <string name="name">Name</string>
+    <string name="empty_name">empty name</string>
+    <string name="current_balance">Current Balance</string>
+    <string name="_0_00">0,00</string>
+    <string name="balance_hint">You can always change this later</string>
+    <string name="empty_balance">empty balance</string>
+    <string name="date_of_current_balance">Date of Current Balance</string>
+    <string name="choose_date">choose date</string>
+    <string name="select_account_type">select account type</string>
+    <string name="budget_account_button">Budget Account - This account should affect my budget</string>
+    <string name="off_budget_button">Off-Budget - This account should not affect my budget</string>
+    <string name="select_budget_affect">select budget affect</string>
+    <string name="create_account">Create Account</string>
+    <string name="type">Type</string>
+</resources>
