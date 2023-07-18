@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -171,27 +172,65 @@ private fun CreateAccountBody(
             modifier = Modifier.align(Alignment.End)
         )
 
+        //TODO: У этих элементов ввода есть неприятная особенность -
+        // пользователь будет хотеть тыкать в текст! И ожидать, что установится галочка.
         Column(
-            Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .selectableGroup()
+                .padding(bottom = PADDING_BIG)
         ) {
-            Row {
-                RadioButton(selected = uiState.selectedBudget == BudgetType.BudgetAccount,
-                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount) })
-                Text(stringResource(R.string.budget_account_button))
+            Row(
+                verticalAlignment = Alignment.Top
+            ) {
+                //FIXME: Как поднять радио-кнопки на уровень первой строки?
+                RadioButton(
+                    selected = uiState.selectedBudget == BudgetType.BudgetAccount,
+                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount) }
+                )
+                Column {
+                    Text(
+                        text = "Budget Account",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "This account should affect my budget",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
-            Row {
-                RadioButton(selected = uiState.selectedBudget == BudgetType.OffBudget,
-                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) })
-                Text(stringResource(R.string.off_budget_button))
+            Row(
+                verticalAlignment = Alignment.Top
+            ) {
+                RadioButton(
+                    selected = uiState.selectedBudget == BudgetType.OffBudget,
+                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) }
+                )
+                Column {
+                    Text(
+                        text = "Off-Budget",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "This account should not affect my budget",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            if (uiState.selectedBudget == null) {
+                Text(
+                    text = stringResource(R.string.select_budget_affect),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(start = PADDING_BIG)
+                )
             }
         }
-        if (uiState.selectedBudget == null) Text(
-            text = stringResource(R.string.select_budget_affect),
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.align(Alignment.End)
-        )
 
-        Button(modifier = Modifier.fillMaxWidth(), onClick = {/*TODO*/ }) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {/*TODO*/ }
+        ) {
             Text(stringResource(R.string.create_account))
         }
     }
