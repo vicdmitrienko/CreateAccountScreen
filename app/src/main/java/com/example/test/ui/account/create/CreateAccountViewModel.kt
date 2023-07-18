@@ -1,16 +1,17 @@
-package com.example.test
+package com.example.test.ui.account.create
 
 import androidx.lifecycle.ViewModel
+import com.example.test.BudgetType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class MainViewModel : ViewModel() {
+class CreateAccountViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-    fun updateUserName(name:String){
+    fun updateUserName(name:String) {
         _uiState.update {
             it.copy(
                 name = name
@@ -18,7 +19,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun updateCurrentBalance(balance:String){
+    fun updateCurrentBalance(balance:String) {
         _uiState.update {
             it.copy(
                 currentBalance = balance
@@ -26,7 +27,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun updateCurrentDate(date:String){
+    fun updateCurrentDate(date:String) {
         _uiState.update {
             it.copy(
                 dateOfCurrentBalance = date
@@ -34,7 +35,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun updateAccountType(type:String){
+    fun updateAccountType(type:String) {
         _uiState.update {
             it.copy(
                 accountTypeMenuExpanded = false,
@@ -43,7 +44,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun updateBudgetType(budgetType:BudgetType){
+    fun updateBudgetType(budgetType: BudgetType) {
         _uiState.update {
             it.copy(
                 selectedBudget = budgetType
@@ -58,4 +59,14 @@ class MainViewModel : ViewModel() {
             )
         }
     }
+
+    //TODO: Уточнить типы данных по всем полям
+    data class UiState(
+        val name: String = "",
+        val currentBalance: String = "",
+        val dateOfCurrentBalance: String = "",
+        val selectedBudget: BudgetType? = null,
+        val selectedAccountType: String = "Select an Account Type",
+        val accountTypeMenuExpanded: Boolean = false
+    )
 }
