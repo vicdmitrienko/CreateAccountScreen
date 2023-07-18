@@ -15,4 +15,7 @@
     <string name="select_budget_affect">select budget affect</string>
     <string name="create_account">Create Account</string>
     <string name="type">Type</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="account_not_created">Account is not created</string>
+    <string name="create_an_account">Create an account</string>
 </resources>

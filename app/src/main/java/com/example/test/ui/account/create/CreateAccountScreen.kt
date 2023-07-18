@@ -2,20 +2,22 @@ package com.example.test.ui.account.create
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
@@ -38,42 +40,59 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.test.AccountType
 import com.example.test.BudgetType
 import com.example.test.R
+import com.example.test.UserData
 import com.example.test.ui.common.components.CommonAppBar
+import com.example.test.ui.theme.AppTheme
 import com.example.test.ui.theme.PADDING_BIG
 import com.example.test.ui.theme.PADDING_MED
-import com.example.test.ui.theme.AppTheme
+import com.example.test.ui.theme.PADDING_SMALL
+import com.example.test.ui.theme.SIZE_SMALL
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import java.util.Calendar
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAccountScreen() {
+fun CreateAccountScreen(navController: NavController) {
 
     val thisViewModel: CreateAccountViewModel = viewModel()
     val uiState by thisViewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            CommonAppBar(stringResource(R.string.create_account))
-        },
-        content = { padding ->
-            CreateAccountBody(
-                padding = padding,
-                uiState = uiState,
-                viewModel = thisViewModel
-            )
-        }
-    )
+    Scaffold(topBar = {
+        CommonAppBar(stringResource(R.string.create_account))
+    }, content = { padding ->
+        CreateAccountBody(
+            padding = padding,
+            uiState = uiState,
+            viewModel = thisViewModel,
+            onSuccess = {
+                val gson: Gson = GsonBuilder().create()
+                val userJson = gson.toJson(it)
+                navController.navigate(
+                    "result_screen/{user}"
+                        .replace(
+                            oldValue = "{user}",
+                            newValue = userJson
+                        )
+                )
+            },
+            onCancel = { navController.navigate("result_screen") }
+        )
+    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,15 +100,19 @@ fun CreateAccountScreen() {
 private fun CreateAccountBody(
     padding: PaddingValues,
     uiState: CreateAccountViewModel.UiState,
-    viewModel: CreateAccountViewModel
+    viewModel: CreateAccountViewModel,
+    onSuccess: (userData: UserData) -> Unit,
+    onCancel: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .padding(padding)
             .padding(vertical = PADDING_MED, horizontal = PADDING_BIG)
-            .verticalScroll(state = rememberScrollState())
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(PADDING_BIG)
     ) {
 
         OutlinedTextField(
@@ -98,13 +121,12 @@ private fun CreateAccountBody(
             label = {
                 Text(stringResource(R.string.name))
             },
-
             // Вывод сообщения об ошибке
             supportingText = {
-                Text("Текст ошибки")
+                if (uiState.nameError != null)
+                    Text(uiState.nameError)
             },
-            isError = true,
-            
+            isError = uiState.nameError != null,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next
             ),
@@ -113,11 +135,18 @@ private fun CreateAccountBody(
             }),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = PADDING_BIG)
         )
 
-        OutlinedTextField(value = uiState.currentBalance,
+        OutlinedTextField(
+            value = uiState.currentBalance,
             onValueChange = { viewModel.updateCurrentBalance(it) },
+            supportingText = {
+                if (uiState.currentBalanceError != null)
+                    Text(uiState.currentBalanceError)
+                else
+                    Text(stringResource(R.string.balance_hint))
+            },
+            isError = uiState.currentBalanceError != null,
             label = {
                 Text(stringResource(R.string.current_balance))
             },
@@ -128,20 +157,16 @@ private fun CreateAccountBody(
                 imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
             ),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            modifier = Modifier.fillMaxWidth())
-        Text(
-            stringResource(R.string.balance_hint),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (uiState.currentBalance.isEmpty()) Text(
-            text = stringResource(R.string.empty_balance),
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.fillMaxWidth()
         )
 
         DatePickerField(date = uiState.dateOfCurrentBalance,
             label = stringResource(R.string.date_of_current_balance),
+            supportingText = {
+                if (uiState.dateOfCurrentBalanceError != null)
+                    Text(uiState.dateOfCurrentBalanceError)
+            },
+            isError = uiState.dateOfCurrentBalanceError != null,
             onDateChanged = { year, month, day ->
                 when {
                     day < 10 && month < 10 -> viewModel.updateCurrentDate("0$day.0$month.$year")
@@ -153,44 +178,39 @@ private fun CreateAccountBody(
                     else -> viewModel.updateCurrentDate("$day.$month.$year")
                 }
             })
-        if (uiState.dateOfCurrentBalance.isEmpty()) Text(
-            text = stringResource(R.string.choose_date),
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.align(Alignment.End)
-        )
 
         AccountTypeDropDownMenu(
             expanded = uiState.accountTypeMenuExpanded,
+            isError = uiState.selectedAccountTypeError != null,
             onExpandedChange = { viewModel.updateAccountTypeExpanded(it) },
             onDismissRequest = { viewModel.updateAccountTypeExpanded(isExpanded = false) },
             onSelectType = { viewModel.updateAccountType(type = it) },
             selectedItem = uiState.selectedAccountType
         )
-        if (uiState.selectedAccountType == "Select an Account Type") Text(
-            text = stringResource(R.string.select_account_type),
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.align(Alignment.End)
-        )
 
-        //TODO: У этих элементов ввода есть неприятная особенность -
-        // пользователь будет хотеть тыкать в текст! И ожидать, что установится галочка.
         Column(
             modifier = Modifier
                 .selectableGroup()
-                .padding(bottom = PADDING_BIG)
+                .padding(bottom = PADDING_BIG),
+            verticalArrangement = Arrangement.spacedBy(PADDING_MED)
         ) {
             Row(
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)
             ) {
-                //FIXME: Как поднять радио-кнопки на уровень первой строки?
                 RadioButton(
                     selected = uiState.selectedBudget == BudgetType.BudgetAccount,
-                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount) }
+                    onClick = {
+                        viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
+                    },
+                    modifier =
+                    Modifier.size(SIZE_SMALL)
                 )
-                Column {
+                Column(Modifier.clickable {
+                    viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
+                }) {
                     Text(
-                        text = "Budget Account",
-                        style = MaterialTheme.typography.bodyLarge
+                        text = "Budget Account", style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
                         text = "This account should affect my budget",
@@ -199,16 +219,20 @@ private fun CreateAccountBody(
                 }
             }
             Row(
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)
             ) {
                 RadioButton(
                     selected = uiState.selectedBudget == BudgetType.OffBudget,
-                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) }
+                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) },
+                    modifier =
+                    Modifier.size(SIZE_SMALL)
                 )
-                Column {
+                Column(Modifier.clickable {
+                    viewModel.updateBudgetType(budgetType = BudgetType.OffBudget)
+                }) {
                     Text(
-                        text = "Off-Budget",
-                        style = MaterialTheme.typography.bodyLarge
+                        text = "Off-Budget", style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
                         text = "This account should not affect my budget",
@@ -216,22 +240,51 @@ private fun CreateAccountBody(
                     )
                 }
             }
-
-            if (uiState.selectedBudget == null) {
+            if (uiState.selectedBudgetError != null) {
                 Text(
-                    text = stringResource(R.string.select_budget_affect),
+                    text = uiState.selectedBudgetError,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(start = PADDING_BIG)
+                    modifier = Modifier.align(Alignment.End)
                 )
             }
         }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = {/*TODO*/ }
+            onClick = {
+                viewModel.createAccount {
+                    if (it)
+                        onSuccess(
+                            UserData(
+                                name = uiState.name,
+                                currentBalance = uiState.currentBalance,
+                                dateOfCurrentBalance = uiState.dateOfCurrentBalance,
+                                selectedAccountType = uiState.selectedAccountType,
+                                selectedBudget = uiState.selectedBudget,
+                            )
+                        )
+                    else
+                        Toast.makeText(
+                            context,
+                            "Check fields",
+                            Toast.LENGTH_LONG
+                        ).show()
+                }
+            }
         ) {
             Text(stringResource(R.string.create_account))
+        }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onCancel,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(stringResource(R.string.cancel_button))
         }
     }
 }
@@ -240,17 +293,21 @@ private fun CreateAccountBody(
 @Composable
 fun AccountTypeDropDownMenu(
     expanded: Boolean,
+    isError: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
-    onSelectType: (String) -> Unit,
-    selectedItem: String,
+    onSelectType: (AccountType) -> Unit,
+    selectedItem: AccountType,
 ) {
-    val listItems = arrayOf("Account Type 1", "Account Type 2", "Account Type 3", "Account Type 4")
+    val listItems =
+        arrayOf(AccountType.TYPE1, AccountType.TYPE2, AccountType.TYPE3, AccountType.TYPE4)
 
     ExposedDropdownMenuBox(
         expanded = expanded, onExpandedChange = onExpandedChange
     ) {
-        TextField(value = selectedItem,
+        TextField(
+            value = selectedItem.type,
+            isError = isError,
             onValueChange = {},
             readOnly = true,
             label = { Text(text = stringResource(R.string.type)) },
@@ -270,7 +327,7 @@ fun AccountTypeDropDownMenu(
                 DropdownMenuItem(
                     onClick = { onSelectType(selectedOption) },
                 ) {
-                    Text(selectedOption)
+                    Text(selectedOption.type)
                 }
             }
         }
@@ -281,7 +338,10 @@ fun AccountTypeDropDownMenu(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerField(
-    date: String, label: String, onDateChanged: (Int, Int, Int) -> Unit
+    date: String, label: String,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean,
+    onDateChanged: (Int, Int, Int) -> Unit
 ) {
     val mContext = LocalContext.current
     val mCalendar = Calendar.getInstance()
@@ -298,9 +358,12 @@ fun DatePickerField(
     )
 
     Box {
-        OutlinedTextField(readOnly = true,
+        OutlinedTextField(
+            readOnly = true,
             value = date,
             onValueChange = {},
+            supportingText = supportingText,
+            isError = isError,
             label = { Text(label) },
             trailingIcon = {
                 Icon(
@@ -323,6 +386,6 @@ fun DatePickerField(
 @Composable
 fun CreateAccountPreview() {
     AppTheme {
-        CreateAccountScreen()
+        CreateAccountScreen(rememberNavController())
     }
 }
