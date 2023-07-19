@@ -47,7 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.test.R
-import com.example.test.data.AccountCreatingData
+import com.example.test.data.AccountData
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
 import com.example.test.ui.common.components.CommonAppBar
@@ -62,9 +62,14 @@ import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAccountScreen(onSuccess: (AccountCreatingData) -> Unit, onCancel: () -> Unit) {
-
+fun CreateAccountScreen(
+    accountData: AccountData? = null,
+    onSuccess: (AccountData) -> Unit,
+    onCancel: () -> Unit
+) {
     val thisViewModel: CreateAccountViewModel = viewModel()
+    if (accountData != null)
+        thisViewModel.updateAccountData(accountData)
     val uiState by thisViewModel.uiState.collectAsState()
 
     Scaffold(topBar = {
@@ -85,7 +90,7 @@ private fun CreateAccountBody(
     padding: PaddingValues,
     uiState: CreateAccountViewModel.UiState,
     viewModel: CreateAccountViewModel,
-    onSuccess: (accountCreatingData: AccountCreatingData) -> Unit
+    onSuccess: (accountData: AccountData) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -99,7 +104,7 @@ private fun CreateAccountBody(
     ) {
 
         OutlinedTextField(
-            value = uiState.accountCreatingData.name,
+            value = uiState.accountData.name,
             onValueChange = { viewModel.updateUserName(it) },
             label = {
                 Text(stringResource(R.string.name))
@@ -121,7 +126,7 @@ private fun CreateAccountBody(
         )
 
         OutlinedTextField(
-            value = uiState.accountCreatingData.currentBalance,
+            value = uiState.accountData.currentBalance,
             onValueChange = { viewModel.updateCurrentBalance(it) },
             supportingText = {
                 if (uiState.currentBalanceError != null)
@@ -143,7 +148,7 @@ private fun CreateAccountBody(
             modifier = Modifier.fillMaxWidth()
         )
 
-        DatePickerField(date = uiState.accountCreatingData.dateOfCurrentBalance,
+        DatePickerField(date = uiState.accountData.dateOfCurrentBalance,
             label = stringResource(R.string.date_of_current_balance),
             supportingText = {
                 if (uiState.dateOfCurrentBalanceError != null)
@@ -168,7 +173,7 @@ private fun CreateAccountBody(
             onExpandedChange = { viewModel.updateAccountTypeExpanded(it) },
             onDismissRequest = { viewModel.updateAccountTypeExpanded(isExpanded = false) },
             onSelectType = { viewModel.updateAccountType(type = it) },
-            selectedItem = uiState.accountCreatingData.selectedAccountType
+            selectedItem = uiState.accountData.selectedAccountType
         )
 
         Column(
@@ -182,7 +187,7 @@ private fun CreateAccountBody(
                 horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)
             ) {
                 RadioButton(
-                    selected = uiState.accountCreatingData.selectedBudget == BudgetType.BudgetAccount,
+                    selected = uiState.accountData.selectedBudget == BudgetType.BudgetAccount,
                     onClick = {
                         viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
                     },
@@ -207,7 +212,7 @@ private fun CreateAccountBody(
                 horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)
             ) {
                 RadioButton(
-                    selected = uiState.accountCreatingData.selectedBudget == BudgetType.OffBudget,
+                    selected = uiState.accountData.selectedBudget == BudgetType.OffBudget,
                     onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) },
                     modifier =
                     Modifier.size(CHECKBOX_SIZE_SMALL)
@@ -240,12 +245,12 @@ private fun CreateAccountBody(
                 viewModel.createAccount {
                     if (it)
                         onSuccess(
-                            AccountCreatingData(
-                                name = uiState.accountCreatingData.name,
-                                currentBalance = uiState.accountCreatingData.currentBalance,
-                                dateOfCurrentBalance = uiState.accountCreatingData.dateOfCurrentBalance,
-                                selectedAccountType = uiState.accountCreatingData.selectedAccountType,
-                                selectedBudget = uiState.accountCreatingData.selectedBudget,
+                            AccountData(
+                                name = uiState.accountData.name,
+                                currentBalance = uiState.accountData.currentBalance,
+                                dateOfCurrentBalance = uiState.accountData.dateOfCurrentBalance,
+                                selectedAccountType = uiState.accountData.selectedAccountType,
+                                selectedBudget = uiState.accountData.selectedBudget,
                             )
                         )
                     else

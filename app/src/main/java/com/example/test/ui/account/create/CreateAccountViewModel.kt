@@ -1,7 +1,7 @@
 package com.example.test.ui.account.create
 
 import androidx.lifecycle.ViewModel
-import com.example.test.data.AccountCreatingData
+import com.example.test.data.AccountData
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,10 +13,18 @@ class CreateAccountViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
+    fun updateAccountData(accountData: AccountData) {
+        _uiState.update {
+            it.copy(
+                accountData = accountData
+            )
+        }
+    }
+
     fun updateUserName(name: String) {
         _uiState.update {
             it.copy(
-                accountCreatingData = it.accountCreatingData.copy(name = name),
+                accountData = it.accountData.copy(name = name),
                 nameError = validateName(name)
             )
         }
@@ -25,7 +33,7 @@ class CreateAccountViewModel : ViewModel() {
     fun updateCurrentBalance(balance: String) {
         _uiState.update {
             it.copy(
-                accountCreatingData = it.accountCreatingData.copy(currentBalance = balance),
+                accountData = it.accountData.copy(currentBalance = balance),
                 currentBalanceError = validateCurrentBalance(balance)
             )
         }
@@ -34,7 +42,7 @@ class CreateAccountViewModel : ViewModel() {
     fun updateCurrentDate(date: String) {
         _uiState.update {
             it.copy(
-                accountCreatingData = it.accountCreatingData.copy(dateOfCurrentBalance = date),
+                accountData = it.accountData.copy(dateOfCurrentBalance = date),
                 dateOfCurrentBalanceError = validateDate(date)
             )
         }
@@ -44,7 +52,7 @@ class CreateAccountViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 accountTypeMenuExpanded = false,
-                accountCreatingData = it.accountCreatingData.copy(selectedAccountType = type),
+                accountData = it.accountData.copy(selectedAccountType = type),
                 selectedAccountTypeError = validateAccountType(type)
             )
         }
@@ -53,7 +61,7 @@ class CreateAccountViewModel : ViewModel() {
     fun updateBudgetType(budgetType: BudgetType) {
         _uiState.update {
             it.copy(
-                accountCreatingData = it.accountCreatingData.copy(selectedBudget = budgetType),
+                accountData = it.accountData.copy(selectedBudget = budgetType),
                 selectedBudgetError = validateBudgetType(budgetType)
             )
         }
@@ -71,11 +79,11 @@ class CreateAccountViewModel : ViewModel() {
         //Валидация всех полей
         _uiState.update {
             it.copy(
-                selectedAccountTypeError = validateAccountType(uiState.value.accountCreatingData.selectedAccountType),
-                selectedBudgetError = validateBudgetType(uiState.value.accountCreatingData.selectedBudget),
-                nameError = validateName(uiState.value.accountCreatingData.name),
-                dateOfCurrentBalanceError = validateDate(uiState.value.accountCreatingData.dateOfCurrentBalance),
-                currentBalanceError = validateCurrentBalance(uiState.value.accountCreatingData.currentBalance),
+                selectedAccountTypeError = validateAccountType(uiState.value.accountData.selectedAccountType),
+                selectedBudgetError = validateBudgetType(uiState.value.accountData.selectedBudget),
+                nameError = validateName(uiState.value.accountData.name),
+                dateOfCurrentBalanceError = validateDate(uiState.value.accountData.dateOfCurrentBalance),
+                currentBalanceError = validateCurrentBalance(uiState.value.accountData.currentBalance),
             )
         }
         val noErrors: Boolean =
@@ -93,7 +101,7 @@ class CreateAccountViewModel : ViewModel() {
 
     //TODO: Уточнить типы данных по всем полям
     data class UiState(
-        val accountCreatingData: AccountCreatingData = AccountCreatingData(
+        val accountData: AccountData = AccountData(
             name = "",
             currentBalance = "",
             dateOfCurrentBalance = "",
