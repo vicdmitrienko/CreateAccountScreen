@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.test.R
-import com.example.test.data.UserData
+import com.example.test.data.AccountCreatingData
 import com.example.test.ui.theme.PADDING_MED
 
 @Composable
 fun ResultScreen(
     navController: NavController,
-    userData: UserData? = null
+    accountCreatingData: AccountCreatingData? = null
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -29,15 +29,15 @@ fun ResultScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (userData == null)
+        if (accountCreatingData == null) //Проверяем пришли ли данные
             Text(stringResource(R.string.account_not_created))
         else {
             Text(
-                text = "user name = ${userData.name}\n" +
-                        "current balance = ${userData.currentBalance}\n" +
-                        "date = ${userData.dateOfCurrentBalance}\n" +
-                        "account type = ${userData.selectedAccountType.type}\n" +
-                        "budget type = ${userData.selectedBudget?.type}\n",
+                text = "user name = ${accountCreatingData.name}\n" +
+                        "current balance = ${accountCreatingData.currentBalance}\n" +
+                        "date = ${accountCreatingData.dateOfCurrentBalance}\n" +
+                        "account type = ${accountCreatingData.selectedAccountType.type}\n" +
+                        "budget type = ${accountCreatingData.selectedBudget?.type}\n",
                 style = MaterialTheme.typography.titleMedium
             )
         }
