@@ -7,4 +7,4 @@ val PADDING_MED = 8.dp
 val PADDING_SMALL = 4.dp
 
 
-val SIZE_SMALL = 30.dp
+val CHECKBOX_SIZE_SMALL = 30.dp

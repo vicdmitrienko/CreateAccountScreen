@@ -1,4 +1,4 @@
-package com.example.test
+package com.example.test.data.enums
 
 enum class AccountType (val type:String) {
     NONE(type = "Select an Account Type"),

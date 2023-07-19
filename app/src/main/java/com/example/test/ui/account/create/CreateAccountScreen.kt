@@ -50,21 +50,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.test.AccountType
-import com.example.test.BudgetType
+import com.example.test.data.enums.AccountType
+import com.example.test.data.enums.BudgetType
 import com.example.test.R
-import com.example.test.UserData
+import com.example.test.data.UserData
 import com.example.test.ui.common.components.CommonAppBar
 import com.example.test.ui.theme.AppTheme
 import com.example.test.ui.theme.PADDING_BIG
 import com.example.test.ui.theme.PADDING_MED
 import com.example.test.ui.theme.PADDING_SMALL
-import com.example.test.ui.theme.SIZE_SMALL
+import com.example.test.ui.theme.CHECKBOX_SIZE_SMALL
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import java.util.Calendar
 import java.util.Date
 
+//FIXME: Предлагаю навигацию не отдавать на экран.
+// Экран может участвовать в различных сценариях.
+// Например, он может использоваться для редактирования существующей сущности.
+// Может быть использован в сценарии "Первичная настройка".
+// А значит, он не имеет права решать куда направлять навигацию дальше.
+// Следует просто сообщить "Закончил работу, результат вот такой".
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(navController: NavController) {
@@ -188,6 +194,8 @@ private fun CreateAccountBody(
             selectedItem = uiState.selectedAccountType
         )
 
+        //TODO: У этих элементов ввода есть неприятная особенность -
+        // пользователь будет хотеть тыкать в текст! И ожидать, что установится галочка.
         Column(
             modifier = Modifier
                 .selectableGroup()
@@ -204,7 +212,7 @@ private fun CreateAccountBody(
                         viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
                     },
                     modifier =
-                    Modifier.size(SIZE_SMALL)
+                    Modifier.size(CHECKBOX_SIZE_SMALL)
                 )
                 Column(Modifier.clickable {
                     viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
@@ -226,7 +234,7 @@ private fun CreateAccountBody(
                     selected = uiState.selectedBudget == BudgetType.OffBudget,
                     onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) },
                     modifier =
-                    Modifier.size(SIZE_SMALL)
+                    Modifier.size(CHECKBOX_SIZE_SMALL)
                 )
                 Column(Modifier.clickable {
                     viewModel.updateBudgetType(budgetType = BudgetType.OffBudget)
@@ -276,6 +284,7 @@ private fun CreateAccountBody(
             Text(stringResource(R.string.create_account))
         }
 
+        //FIXME: Это действие перенести на стрелку "Назад" в заголовке
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = onCancel,
@@ -289,6 +298,7 @@ private fun CreateAccountBody(
     }
 }
 
+//FIXME: Должна быть приватной
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AccountTypeDropDownMenu(
@@ -335,6 +345,7 @@ fun AccountTypeDropDownMenu(
 }
 
 
+//FIXME: Должна быть приватной
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerField(
@@ -384,7 +395,7 @@ fun DatePickerField(
 
 @Preview(showBackground = true)
 @Composable
-fun CreateAccountPreview() {
+private fun CreateAccountPreview() {
     AppTheme {
         CreateAccountScreen(rememberNavController())
     }

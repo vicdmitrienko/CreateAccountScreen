@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.test.R
-import com.example.test.UserData
+import com.example.test.data.UserData
 import com.example.test.ui.theme.PADDING_MED
 
 @Composable

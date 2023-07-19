@@ -1,8 +1,8 @@
 package com.example.test.ui.account.create
 
 import androidx.lifecycle.ViewModel
-import com.example.test.AccountType
-import com.example.test.BudgetType
+import com.example.test.data.enums.AccountType
+import com.example.test.data.enums.BudgetType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -62,6 +62,7 @@ class CreateAccountViewModel : ViewModel() {
         }
     }
 
+    //FIXME: По всему проекту сильно нехватает комментариев (по-русски)
     fun createAccount(onValidated: (Boolean) -> Unit) {
         _uiState.update {
             it.copy(
@@ -72,16 +73,15 @@ class CreateAccountViewModel : ViewModel() {
                 currentBalanceError = validateCurrentBalance(uiState.value.currentBalance),
             )
         }
-        var hasErrors: Boolean
-        with(uiState.value) {
-            hasErrors =
-                (nameError != null
-                        || currentBalanceError != null
-                        || dateOfCurrentBalanceError != null
-                        || selectedAccountTypeError != null
-                        || selectedBudgetError != null)
+        val noErrors: Boolean =
+            with(uiState.value) {
+                (nameError == null
+                        && currentBalanceError == null
+                        && dateOfCurrentBalanceError == null
+                        && selectedAccountTypeError == null
+                        && selectedBudgetError == null)
         }
-        onValidated(!hasErrors)
+        onValidated(noErrors)
     }
 
     //TODO: Уточнить типы данных по всем полям
