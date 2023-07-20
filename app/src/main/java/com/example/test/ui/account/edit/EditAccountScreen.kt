@@ -34,6 +34,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -67,18 +68,16 @@ private const val TAG = "EditAccountScreen"
 fun EditAccountScreen(
     accountData: AccountData? = null,
     onSuccess: (AccountData) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     val thisViewModel: EditAccountViewModel = viewModel()
-
-    //FIXME: Так делать нельзя — рекомпозиция будет вызывать этот метод многократно. Гляньте тему SideEffects
     if (accountData != null) {
-        thisViewModel.updateAccountData(accountData)
-        Log.e(TAG, "thisViewModel.updateAccountData(accountData)")
+        LaunchedEffect(Unit) {
+            thisViewModel.updateAccountData(accountData)
+            Log.e(TAG, "thisViewModel.updateAccountData(accountData)")
+        }
     }
-
     val uiState by thisViewModel.uiState.collectAsState()
-
     Scaffold(topBar = {
         CommonAppBar(stringResource(R.string.create_account), onBackClick = onCancel)
     }) { padding ->
@@ -183,9 +182,6 @@ private fun CreateAccountBody(
             selectedItem = uiState.accountData.selectedAccountType
         )
 
-        //FIXME: У этих элементов ввода есть неприятная особенность -
-        // пользователь будет хотеть тыкать в текст! И ожидать, что установится галочка.
-        // Сделайте нажатие на всю строку изменяющим радио-кнопку.
         Column(
             modifier = Modifier
                 .selectableGroup()
@@ -194,7 +190,12 @@ private fun CreateAccountBody(
         ) {
             Row(
                 verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)
+                horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
+                    }
             ) {
                 RadioButton(
                     selected = uiState.accountData.selectedBudget == BudgetType.BudgetAccount,
@@ -204,9 +205,7 @@ private fun CreateAccountBody(
                     modifier =
                     Modifier.size(CHECKBOX_SIZE_SMALL)
                 )
-                Column(Modifier.clickable {
-                    viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
-                }) {
+                Column {
                     Text(
                         text = BudgetType.BudgetAccount.type,
                         style = MaterialTheme.typography.bodyLarge
@@ -219,7 +218,12 @@ private fun CreateAccountBody(
             }
             Row(
                 verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)
+                horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        viewModel.updateBudgetType(budgetType = BudgetType.OffBudget)
+                    }
             ) {
                 RadioButton(
                     selected = uiState.accountData.selectedBudget == BudgetType.OffBudget,
@@ -227,9 +231,7 @@ private fun CreateAccountBody(
                     modifier =
                     Modifier.size(CHECKBOX_SIZE_SMALL)
                 )
-                Column(Modifier.clickable {
-                    viewModel.updateBudgetType(budgetType = BudgetType.OffBudget)
-                }) {
+                Column {
                     Text(
                         text = BudgetType.OffBudget.type, style = MaterialTheme.typography.bodyLarge
                     )
@@ -254,15 +256,7 @@ private fun CreateAccountBody(
             onClick = {
                 viewModel.createAccount {
                     if (it)
-                        onSuccess(
-                            AccountData(
-                                name = uiState.accountData.name,
-                                currentBalance = uiState.accountData.currentBalance,
-                                dateOfCurrentBalance = uiState.accountData.dateOfCurrentBalance,
-                                selectedAccountType = uiState.accountData.selectedAccountType,
-                                selectedBudget = uiState.accountData.selectedBudget,
-                            )
-                        )
+                        onSuccess(uiState.accountData)
                     else
                         Toast.makeText(
                             context,

@@ -10,19 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import com.example.test.R
 import com.example.test.data.AccountData
-import com.example.test.navigation.Screen
 import com.example.test.ui.theme.PADDING_MED
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 
-//FIXME: Избавляться, так избавляться. Сможете убрать NavController?
 @Composable
 fun ResultScreen(
-    navController: NavController,
-    accountData: AccountData? = null
+    accountData: AccountData? = null,
+    navigateToEditAccountScreen: (accountData: AccountData?) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -46,18 +41,8 @@ fun ResultScreen(
             )
         }
         Button(onClick = {
-            val gson: Gson = GsonBuilder().create()
-            // Передаем данные аккаунта, если они есть
-            if (accountData != null)
-                navController.navigate(
-                    "${Screen.AccountCreateScreen.route}?accountData={accountData}"
-                        .replace(
-                            oldValue = "{accountData}",
-                            newValue = gson.toJson(accountData)
-                        )
-                )
-            else
-                navController.navigate(Screen.AccountCreateScreen.route)
+            // Передаем данные аккаунта
+            navigateToEditAccountScreen(accountData)
         }) {
             Text(stringResource(R.string.create_an_account))
         }
