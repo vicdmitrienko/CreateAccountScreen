@@ -12,13 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.test.R
-import com.example.test.data.UserData
+import com.example.test.data.AccountData
+import com.example.test.navigation.Screen
 import com.example.test.ui.theme.PADDING_MED
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
+//FIXME: Избавляться, так избавляться. Сможете убрать NavController?
 @Composable
 fun ResultScreen(
     navController: NavController,
-    userData: UserData? = null
+    accountData: AccountData? = null
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -29,19 +33,32 @@ fun ResultScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (userData == null)
+        if (accountData == null) // Проверяем пришли ли данные
             Text(stringResource(R.string.account_not_created))
         else {
             Text(
-                text = "user name = ${userData.name}\n" +
-                        "current balance = ${userData.currentBalance}\n" +
-                        "date = ${userData.dateOfCurrentBalance}\n" +
-                        "account type = ${userData.selectedAccountType.type}\n" +
-                        "budget type = ${userData.selectedBudget?.type}\n",
+                text = "user name = ${accountData.name}\n" +
+                        "current balance = ${accountData.currentBalance}\n" +
+                        "date = ${accountData.dateOfCurrentBalance}\n" +
+                        "account type = ${accountData.selectedAccountType.type}\n" +
+                        "budget type = ${accountData.selectedBudget?.type}\n",
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Button(onClick = { navController.navigate("account_create_screen") }) {
+        Button(onClick = {
+            val gson: Gson = GsonBuilder().create()
+            // Передаем данные аккаунта, если они есть
+            if (accountData != null)
+                navController.navigate(
+                    "${Screen.AccountCreateScreen.route}?accountData={accountData}"
+                        .replace(
+                            oldValue = "{accountData}",
+                            newValue = gson.toJson(accountData)
+                        )
+                )
+            else
+                navController.navigate(Screen.AccountCreateScreen.route)
+        }) {
             Text(stringResource(R.string.create_an_account))
         }
     }

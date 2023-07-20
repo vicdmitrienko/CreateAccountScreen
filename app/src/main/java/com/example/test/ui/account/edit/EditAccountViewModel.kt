@@ -1,21 +1,31 @@
-package com.example.test.ui.account.create
+package com.example.test.ui.account.edit
 
 import androidx.lifecycle.ViewModel
+import com.example.test.data.AccountData
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class CreateAccountViewModel : ViewModel() {
+class EditAccountViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
+    fun updateAccountData(accountData: AccountData) {
+        _uiState.update {
+            it.copy(
+                accountData = accountData
+            )
+        }
+    }
+
     fun updateUserName(name: String) {
         _uiState.update {
             it.copy(
-                name = name, nameError = validateName(name)
+                accountData = it.accountData.copy(name = name),
+                nameError = validateName(name)
             )
         }
     }
@@ -23,7 +33,8 @@ class CreateAccountViewModel : ViewModel() {
     fun updateCurrentBalance(balance: String) {
         _uiState.update {
             it.copy(
-                currentBalance = balance, currentBalanceError = validateCurrentBalance(balance)
+                accountData = it.accountData.copy(currentBalance = balance),
+                currentBalanceError = validateCurrentBalance(balance)
             )
         }
     }
@@ -31,7 +42,8 @@ class CreateAccountViewModel : ViewModel() {
     fun updateCurrentDate(date: String) {
         _uiState.update {
             it.copy(
-                dateOfCurrentBalance = date, dateOfCurrentBalanceError = validateDate(date)
+                accountData = it.accountData.copy(dateOfCurrentBalance = date),
+                dateOfCurrentBalanceError = validateDate(date)
             )
         }
     }
@@ -40,7 +52,7 @@ class CreateAccountViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 accountTypeMenuExpanded = false,
-                selectedAccountType = type,
+                accountData = it.accountData.copy(selectedAccountType = type),
                 selectedAccountTypeError = validateAccountType(type)
             )
         }
@@ -49,7 +61,8 @@ class CreateAccountViewModel : ViewModel() {
     fun updateBudgetType(budgetType: BudgetType) {
         _uiState.update {
             it.copy(
-                selectedBudget = budgetType, selectedBudgetError = validateBudgetType(budgetType)
+                accountData = it.accountData.copy(selectedBudget = budgetType),
+                selectedBudgetError = validateBudgetType(budgetType)
             )
         }
     }
@@ -62,15 +75,15 @@ class CreateAccountViewModel : ViewModel() {
         }
     }
 
-    //FIXME: По всему проекту сильно нехватает комментариев (по-русски)
     fun createAccount(onValidated: (Boolean) -> Unit) {
+        // Валидация всех полей
         _uiState.update {
             it.copy(
-                selectedAccountTypeError = validateAccountType(uiState.value.selectedAccountType),
-                selectedBudgetError = validateBudgetType(uiState.value.selectedBudget),
-                nameError = validateName(uiState.value.name),
-                dateOfCurrentBalanceError = validateDate(uiState.value.dateOfCurrentBalance),
-                currentBalanceError = validateCurrentBalance(uiState.value.currentBalance),
+                selectedAccountTypeError = validateAccountType(uiState.value.accountData.selectedAccountType),
+                selectedBudgetError = validateBudgetType(uiState.value.accountData.selectedBudget),
+                nameError = validateName(uiState.value.accountData.name),
+                dateOfCurrentBalanceError = validateDate(uiState.value.accountData.dateOfCurrentBalance),
+                currentBalanceError = validateCurrentBalance(uiState.value.accountData.currentBalance),
             )
         }
         val noErrors: Boolean =
@@ -80,25 +93,29 @@ class CreateAccountViewModel : ViewModel() {
                         && dateOfCurrentBalanceError == null
                         && selectedAccountTypeError == null
                         && selectedBudgetError == null)
-        }
+            }
+        //Отправляем наличие ошибок
         onValidated(noErrors)
     }
 
     //TODO: Уточнить типы данных по всем полям
     data class UiState(
-        val name: String = "",
+        val accountData: AccountData = AccountData(
+            name = "",
+            currentBalance = "",
+            dateOfCurrentBalance = "",
+            selectedBudget = null,
+            selectedAccountType = AccountType.NONE
+        ),
         val nameError: String? = null,
-        val currentBalance: String = "",
         val currentBalanceError: String? = null,
-        val dateOfCurrentBalance: String = "",
         val dateOfCurrentBalanceError: String? = null,
-        val selectedBudget: BudgetType? = null,
         val selectedBudgetError: String? = null,
-        val selectedAccountType: AccountType = AccountType.NONE,
         val selectedAccountTypeError: String? = null,
         val accountTypeMenuExpanded: Boolean = false
     )
 
+    // Валидация полей
     private fun validateName(name: String): String? {
         return when {
             name.isEmpty() -> "empty name"

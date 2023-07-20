@@ -3,9 +3,13 @@ package com.example.test.data
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
 
-//FIXME: Название не говорящее
-// И тогда надо отказаться от дублирования этой структуры во ViewModel
-data class UserData(
+/**
+ * Счёт для ведения операций.
+ * В дальнейшем:
+ * - превратится в @Entity
+ * - получит поля: isClosed
+ */
+data class AccountData(
     val name: String,
     val currentBalance: String,
     val dateOfCurrentBalance: String,
