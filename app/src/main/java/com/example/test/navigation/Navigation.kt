@@ -4,48 +4,50 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.test.data.AccountData
 import com.example.test.ui.account.edit.EditAccountScreen
 import com.example.test.ui.result.ResultScreen
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 
 
 @Composable
 fun Navigation() {
-    val gson: Gson = GsonBuilder().create()
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.ResultScreen.route) {
         composable(
-            "${Screen.AccountCreateScreen.route}?accountData={accountData}",
-            arguments = listOf(navArgument("accountData") { defaultValue = "" })
-        ) { backStackEntry ->
-
-            //TODO: Может вместо Gson применять Serializable или Parcelable? Какие варианты видите? Почему?
-            
-            val accountJson = backStackEntry.arguments?.getString("accountData")
-            // Если аргументом передали данные аккаунта, то передаем в экран
+            Screen.AccountCreateScreen.route,
+        ) {
+            // Решил использовать Parcelable, так как он быстрее
+            // и менее затратный по памяти
+            val userObject = navController.previousBackStackEntry?.savedStateHandle?.get<AccountData>("account")
+            // Если сохранили данные счета, то передаем в экран
             EditAccountScreen(
-                accountData = if (accountJson != null) gson.fromJson(
-                    accountJson,
-                    AccountData::class.java
-                ) else null,
+                accountData = userObject,
                 onCancel = { navController.popBackStack() }, // При отмене возвращаемся на предыдущий экран
                 onSuccess = {// При успехе отправляем данные на предыдущий экран и возвращаемся на него
                     navController.previousBackStackEntry
                         ?.savedStateHandle
-                        ?.set("user_data", gson.toJson(it))
+                        ?.set("account", it)
                     navController.popBackStack()
-                }
+                },
             )
         }
 
         composable(Screen.ResultScreen.route) { entry ->
-            val userJson = entry.savedStateHandle.get<String>("user_data")
-            val userObject = gson.fromJson(userJson, AccountData::class.java)
-            // Получаем объект из Json строки
-            ResultScreen(navController = navController, accountData = userObject)
+            // Получим из сохранённых значений данные об аккаунте
+            val accountData: AccountData? = // в некоторых случая удобнее потом разбираться и отлаживать, если указать тип.
+                entry.savedStateHandle.get<AccountData>("account")
+            // Сформируем экран с результатами
+            ResultScreen(
+                accountData = accountData,
+                onCreateOrEditAccount = { account ->
+                    account?.let {
+                        // Положим результат в сохранённые значения
+                        entry.savedStateHandle["account"] = account
+                    }
+                    // Перейдём на экран создания/редактирования
+                    navController.navigate(Screen.AccountCreateScreen.route)
+                }
+            )
         }
     }
 }
