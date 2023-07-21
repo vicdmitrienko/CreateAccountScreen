@@ -21,12 +21,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.ExposedDropdownMenuDefaults
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -47,17 +46,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.test.R
-import com.example.test.data.AccountData
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
+import com.example.test.domain.models.AccountData
 import com.example.test.ui.common.components.CommonAppBar
 import com.example.test.ui.theme.AppTheme
 import com.example.test.ui.theme.CHECKBOX_SIZE_SMALL
 import com.example.test.ui.theme.PADDING_BIG
 import com.example.test.ui.theme.PADDING_MED
 import com.example.test.ui.theme.PADDING_SMALL
+import org.koin.androidx.compose.koinViewModel
 import java.util.Calendar
 import java.util.Date
 
@@ -67,29 +66,31 @@ private const val TAG = "EditAccountScreen"
 @Composable
 fun EditAccountScreen(
     accountData: AccountData? = null,
+    isCreating: Boolean = true,
     onSuccess: (AccountData) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    thisViewModel: EditAccountViewModel = koinViewModel()
 ) {
-    val thisViewModel: EditAccountViewModel = viewModel()
+    val uiState by thisViewModel.uiState.collectAsState()
 
-    //TODO: Разберитесь с LaunchedEffect. Что такое ключ (параметры)
-    if (accountData != null) {
-        LaunchedEffect(Unit) {
+    accountData?.let {
+        LaunchedEffect(it) {
             thisViewModel.updateAccountData(accountData)
             Log.e(TAG, "thisViewModel.updateAccountData(accountData)")
         }
     }
 
-    val uiState by thisViewModel.uiState.collectAsState()
-
+    val title = if (isCreating) stringResource(R.string.create_account)
+    else stringResource(R.string.update_account)
     Scaffold(topBar = {
-        CommonAppBar(stringResource(R.string.create_account), onBackClick = onCancel)
+        CommonAppBar(title = title, onBackClick = onCancel)
     }) { padding ->
         CreateAccountBody(
             padding = padding,
             uiState = uiState,
             viewModel = thisViewModel,
-            onSuccess = onSuccess
+            onSuccess = onSuccess,
+            isCreating = isCreating
         )
     }
 }
@@ -100,7 +101,8 @@ private fun CreateAccountBody(
     padding: PaddingValues,
     uiState: EditAccountViewModel.UiState,
     viewModel: EditAccountViewModel,
-    onSuccess: (accountData: AccountData) -> Unit
+    onSuccess: (accountData: AccountData) -> Unit,
+    isCreating: Boolean
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -255,13 +257,15 @@ private fun CreateAccountBody(
             }
         }
 
+        val buttonText = if (isCreating) stringResource(R.string.create_account)
+        else stringResource(R.string.update_account)
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 viewModel.createAccount {
-                    if (it)
+                    if (it) {
                         onSuccess(uiState.accountData)
-                    else
+                    } else
                         Toast.makeText(
                             context,
                             "Check fields",
@@ -270,12 +274,12 @@ private fun CreateAccountBody(
                 }
             }
         ) {
-            Text(stringResource(R.string.create_account))
+            Text(buttonText)
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountTypeDropDownMenu(
     expanded: Boolean,
@@ -296,7 +300,6 @@ private fun AccountTypeDropDownMenu(
             isError = isError,
             onValueChange = {},
             readOnly = true,
-            label = { Text(text = stringResource(R.string.type)) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded,
@@ -371,7 +374,7 @@ private fun DatePickerField(
 @Preview(showBackground = true)
 @Composable
 private fun CreateAccountPreview() {
-    AppTheme {
+    AppTheme(darkTheme = false) {
         EditAccountScreen(onCancel = {}, onSuccess = {})
     }
 }

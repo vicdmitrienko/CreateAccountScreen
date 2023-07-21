@@ -4,9 +4,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,7 +30,7 @@ fun BackAction(
         Icon(
             imageVector = Icons.Filled.ArrowBack,
             contentDescription = "Назад",
-            tint = MaterialTheme.colors.topAppBarContent
+            tint = topAppBarContent
         )
     }
 }
@@ -34,7 +43,7 @@ fun SearchAction(
         Icon(
             imageVector = Icons.Filled.Search,
             contentDescription = "Поиск",
-            tint = MaterialTheme.colors.topAppBarContent
+            tint = topAppBarContent
         )
     }
 }
@@ -47,7 +56,7 @@ fun CancelAction(
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = "Отменить",
-            tint = MaterialTheme.colors.topAppBarContent
+            tint = topAppBarContent
         )
     }
 }
@@ -62,7 +71,7 @@ fun AddAction(
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Добавить",
-            tint = MaterialTheme.colors.topAppBarContent
+            tint = topAppBarContent
         )
     }
 }
@@ -77,7 +86,7 @@ fun EditAction(
         Icon(
             imageVector = Icons.Default.Edit,
             contentDescription = "Редактировать",
-            tint = MaterialTheme.colors.topAppBarContent
+            tint = topAppBarContent
         )
     }
 }
@@ -96,7 +105,7 @@ fun MoreVertAction(
         Icon(
             imageVector = Icons.Default.MoreVert,
             contentDescription = "MoreVert",
-            tint = MaterialTheme.colors.topAppBarContent
+            tint = topAppBarContent
         )
     }
         DropdownMenu(expanded = expanded, onDismissRequest = { onActionClick() }) {

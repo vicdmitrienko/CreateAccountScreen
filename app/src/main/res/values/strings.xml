@@ -4,7 +4,7 @@
     <string name="name">Name</string>
     <string name="empty_name">empty name</string>
     <string name="current_balance">Current Balance</string>
-    <string name="_0_00">0,00</string>
+    <string name="_0_00">0.00</string>
     <string name="balance_hint">You can always change this later</string>
     <string name="empty_balance">empty balance</string>
     <string name="date_of_current_balance">Date of Current Balance</string>
@@ -18,4 +18,5 @@
     <string name="cancel_button">Cancel</string>
     <string name="account_not_created">Account is not created</string>
     <string name="create_an_account">Create an account</string>
+    <string name="update_account">Update Account</string>
 </resources>
