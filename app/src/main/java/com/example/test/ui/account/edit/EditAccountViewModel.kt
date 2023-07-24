@@ -1,14 +1,19 @@
 package com.example.test.ui.account.edit
 
 import androidx.lifecycle.ViewModel
-import com.example.test.data.AccountData
+import androidx.lifecycle.viewModelScope
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
+import com.example.test.domain.models.AccountData
+import com.example.test.domain.usecase.AccountUseCases
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class EditAccountViewModel : ViewModel() {
+class EditAccountViewModel(
+    private val accountUseCases: AccountUseCases
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -94,8 +99,12 @@ class EditAccountViewModel : ViewModel() {
                         && selectedAccountTypeError == null
                         && selectedBudgetError == null)
             }
-        //Отправляем наличие ошибок
-        onValidated(noErrors)
+        // Отправляем наличие ошибок
+        viewModelScope.launch {
+            accountUseCases.addAccount(account = uiState.value.accountData)
+            // Проверил все ли работает
+            onValidated(noErrors)
+        }
     }
 
     //TODO: Уточнить типы данных по всем полям
@@ -125,7 +134,11 @@ class EditAccountViewModel : ViewModel() {
     }
 
     private fun validateCurrentBalance(balance: String): String? {
-        return if (balance.isEmpty()) "empty balance" else null
+        return when {
+            balance.isEmpty() -> "empty balance"
+            balance.toDoubleOrNull() == null -> "wrong format"
+            else -> null
+        }
     }
 
     private fun validateDate(date: String): String? {

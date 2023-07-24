@@ -6,7 +6,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.AppBarDefaults
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -47,8 +56,8 @@ fun CommonAppBar(
         navigationIcon = backComp,
         actions = actions,
         elevation = elevation,
-        backgroundColor = MaterialTheme.colors.topAppBarBackground,
-        contentColor = MaterialTheme.colors.topAppBarContent
+        backgroundColor = topAppBarBackground,
+        contentColor = topAppBarContent
     )
 }
 
@@ -66,7 +75,7 @@ fun SearchListAppBar(
             .fillMaxWidth()
             .height(HEIGHT_APP_BAR),
         elevation = elevation,
-        color = MaterialTheme.colors.topAppBarBackground
+        color = topAppBarBackground
     ) {
         TextField(
             value = text,
@@ -80,12 +89,12 @@ fun SearchListAppBar(
             placeholder = {
                 Text(
                     text = "Найти",
-                    color = MaterialTheme.colors.topAppBarContent,
+                    color = topAppBarContent,
                     modifier = Modifier.alpha(ContentAlpha.medium)
                 )
             },
             textStyle = TextStyle(
-                color = MaterialTheme.colors.topAppBarContent,
+                color = topAppBarContent,
                 fontSize = MaterialTheme.typography.subtitle1.fontSize
             ),
             singleLine = true,
@@ -93,7 +102,7 @@ fun SearchListAppBar(
                 Icon(
                     imageVector = Icons.Filled.Search,
                     contentDescription = "Найти",
-                    tint = MaterialTheme.colors.topAppBarContent,
+                    tint = topAppBarContent,
                     modifier = Modifier.alpha(ContentAlpha.disabled)
                 )
             },
@@ -110,7 +119,7 @@ fun SearchListAppBar(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Закрыть",
-                        tint = MaterialTheme.colors.topAppBarContent
+                        tint = topAppBarContent
                     )
                 }
             },
@@ -123,7 +132,7 @@ fun SearchListAppBar(
                 }
             ),
             colors = TextFieldDefaults.textFieldColors(
-                cursorColor = MaterialTheme.colors.topAppBarContent,
+                cursorColor = topAppBarContent,
                 focusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
