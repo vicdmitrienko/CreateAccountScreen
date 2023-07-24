@@ -8,6 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,7 +31,7 @@ fun BackAction(
         Icon(
             imageVector = Icons.Filled.ArrowBack,
             contentDescription = "Назад",
-            tint = topAppBarContent
+            tint = MaterialTheme.colors.topAppBarContent
         )
     }
 }
@@ -43,7 +44,7 @@ fun SearchAction(
         Icon(
             imageVector = Icons.Filled.Search,
             contentDescription = "Поиск",
-            tint = topAppBarContent
+            tint = MaterialTheme.colors.topAppBarContent
         )
     }
 }
@@ -56,7 +57,7 @@ fun CancelAction(
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = "Отменить",
-            tint = topAppBarContent
+            tint = MaterialTheme.colors.topAppBarContent
         )
     }
 }
@@ -71,7 +72,7 @@ fun AddAction(
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Добавить",
-            tint = topAppBarContent
+            tint = MaterialTheme.colors.topAppBarContent
         )
     }
 }
@@ -86,7 +87,7 @@ fun EditAction(
         Icon(
             imageVector = Icons.Default.Edit,
             contentDescription = "Редактировать",
-            tint = topAppBarContent
+            tint = MaterialTheme.colors.topAppBarContent
         )
     }
 }
@@ -105,7 +106,7 @@ fun MoreVertAction(
         Icon(
             imageVector = Icons.Default.MoreVert,
             contentDescription = "MoreVert",
-            tint = topAppBarContent
+            tint = MaterialTheme.colors.topAppBarContent
         )
     }
         DropdownMenu(expanded = expanded, onDismissRequest = { onActionClick() }) {

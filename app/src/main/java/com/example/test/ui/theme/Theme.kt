@@ -3,6 +3,7 @@ package com.example.test.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -39,13 +40,10 @@ private val LightColorScheme = lightColorScheme(
 )
 
 //region TopAppBar
-//TODO: Понять аргументацию «Почему отказались от расположения этих осмысленных цветовых параметров».
-// Мой аргумент: В реальном проекте их может быть довольно много — хорошо бы выделить в отдельную «зону».
-
-val topAppBarBackground: Color
+val Colors.topAppBarBackground: Color
     @Composable get() = MaterialTheme.colorScheme.primary
 
-val topAppBarContent: Color
+val Colors.topAppBarContent: Color
     @Composable get() = MaterialTheme.colorScheme.onPrimary
 //endregion
 

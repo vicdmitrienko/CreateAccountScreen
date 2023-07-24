@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.test.domain.models.AccountData
+import com.example.test.domain.models.Account
 import com.example.test.ui.account.edit.EditAccountScreen
 import com.example.test.ui.result.ResultScreen
 
@@ -18,31 +18,31 @@ fun Navigation() {
         ) {
             // Решил использовать Parcelable, так как он быстрее
             // и менее затратный по памяти
-            val accountObject: AccountData? =
-                navController.previousBackStackEntry?.savedStateHandle?.get<AccountData>("account")
+            val accountObject: Account? =
+                navController.previousBackStackEntry?.savedStateHandle?.get<Account>("account")
             // Если сохранили данные счета, то передаем в экран
             EditAccountScreen(
-                accountData = accountObject,
+                account = accountObject,
                 onCancel = { navController.popBackStack() }, // При отмене возвращаемся на предыдущий экран
                 onSuccess = {// При успехе отправляем данные на предыдущий экран и возвращаемся на него
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("account", it)
                     navController.popBackStack()
-                },
-                isCreating = accountObject == null
+                }
             )
         }
 
         composable(Screen.ResultScreen.route) { entry ->
             // Получим из сохранённых значений данные об аккаунте
-            val accountData: AccountData? = // в некоторых случая удобнее потом разбираться и отлаживать, если указать тип.
-                entry.savedStateHandle.get<AccountData>("account")
+            val account: Account? =
+                // в некоторых случая удобнее потом разбираться и отлаживать, если указать тип.
+                entry.savedStateHandle.get<Account>("account")
             // Сформируем экран с результатами
             ResultScreen(
-                accountData = accountData,
-                onCreateOrEditAccount = { account ->
-                    account?.let {
+                account = account,
+                onCreateOrEditAccount = {
+                    it?.let {
                         // Положим результат в сохранённые значения
                         entry.savedStateHandle["account"] = account
                     }

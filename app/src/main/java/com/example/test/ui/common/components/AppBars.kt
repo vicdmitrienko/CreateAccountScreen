@@ -56,8 +56,8 @@ fun CommonAppBar(
         navigationIcon = backComp,
         actions = actions,
         elevation = elevation,
-        backgroundColor = topAppBarBackground,
-        contentColor = topAppBarContent
+        backgroundColor = MaterialTheme.colors.topAppBarBackground,
+        contentColor = MaterialTheme.colors.topAppBarContent
     )
 }
 
@@ -75,7 +75,7 @@ fun SearchListAppBar(
             .fillMaxWidth()
             .height(HEIGHT_APP_BAR),
         elevation = elevation,
-        color = topAppBarBackground
+        color = MaterialTheme.colors.topAppBarBackground
     ) {
         TextField(
             value = text,
@@ -89,12 +89,12 @@ fun SearchListAppBar(
             placeholder = {
                 Text(
                     text = "Найти",
-                    color = topAppBarContent,
+                    color = MaterialTheme.colors.topAppBarContent,
                     modifier = Modifier.alpha(ContentAlpha.medium)
                 )
             },
             textStyle = TextStyle(
-                color = topAppBarContent,
+                color = MaterialTheme.colors.topAppBarContent,
                 fontSize = MaterialTheme.typography.subtitle1.fontSize
             ),
             singleLine = true,
@@ -102,7 +102,7 @@ fun SearchListAppBar(
                 Icon(
                     imageVector = Icons.Filled.Search,
                     contentDescription = "Найти",
-                    tint = topAppBarContent,
+                    tint = MaterialTheme.colors.topAppBarContent,
                     modifier = Modifier.alpha(ContentAlpha.disabled)
                 )
             },
@@ -119,7 +119,7 @@ fun SearchListAppBar(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Закрыть",
-                        tint = topAppBarContent
+                        tint = MaterialTheme.colors.topAppBarContent
                     )
                 }
             },
@@ -132,7 +132,7 @@ fun SearchListAppBar(
                 }
             ),
             colors = TextFieldDefaults.textFieldColors(
-                cursorColor = topAppBarContent,
+                cursorColor = MaterialTheme.colors.topAppBarContent,
                 focusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,

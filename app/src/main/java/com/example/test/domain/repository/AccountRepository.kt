@@ -1,16 +1,16 @@
 package com.example.test.domain.repository
 
-import com.example.test.domain.models.AccountData
+import com.example.test.domain.models.Account
 import kotlinx.coroutines.flow.Flow
 
-//TODO: См. комментарий к Impl
-
 interface AccountRepository {
-    fun getAccounts(): Flow<List<AccountData>>
+    fun getAllAsFlow(): Flow<List<Account>>
 
-    suspend fun getAccountById(id: Int): AccountData?
+    suspend fun getById(id: Int): Account?
 
-    suspend fun insertAccount(account: AccountData)
+    suspend fun insert(account: Account)
 
-    suspend fun deleteAccount(account: AccountData)
+    suspend fun update(account: Account)
+
+    suspend fun delete(account: Account)
 }
