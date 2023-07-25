@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.test.R
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
-import com.example.test.domain.models.AccountData
+import com.example.test.domain.models.Account
 import com.example.test.ui.common.components.CommonAppBar
 import com.example.test.ui.theme.AppTheme
 import com.example.test.ui.theme.CHECKBOX_SIZE_SMALL
@@ -65,26 +66,22 @@ private const val TAG = "EditAccountScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditAccountScreen(
-    accountData: AccountData? = null,
-
-    //TODO: Можно отказаться от этого параметра (принимать решение по accountData == null)
-    isCreating: Boolean = true,
-
-    onSuccess: (AccountData) -> Unit,
+    account: Account? = null,
+    onSuccess: (Account) -> Unit,
     onCancel: () -> Unit,
     thisViewModel: EditAccountViewModel = koinViewModel()
 ) {
     val uiState by thisViewModel.uiState.collectAsState()
 
-    accountData?.let {
+    account?.let {
         LaunchedEffect(it) {
-            thisViewModel.updateAccountData(accountData)
+            thisViewModel.updateAccountData(account)
             Log.e(TAG, "thisViewModel.updateAccountData(accountData)")
         }
     }
 
-    val title = if (isCreating) stringResource(R.string.create_account)
-    else stringResource(R.string.update_account)
+    val title = if (account == null) stringResource(R.string.create_account)
+                else stringResource(R.string.update_account)
     Scaffold(topBar = {
         CommonAppBar(title = title, onBackClick = onCancel)
     }) { padding ->
@@ -93,7 +90,7 @@ fun EditAccountScreen(
             uiState = uiState,
             viewModel = thisViewModel,
             onSuccess = onSuccess,
-            isCreating = isCreating
+            isCreating = account == null
         )
     }
 }
@@ -104,7 +101,7 @@ private fun CreateAccountBody(
     padding: PaddingValues,
     uiState: EditAccountViewModel.UiState,
     viewModel: EditAccountViewModel,
-    onSuccess: (accountData: AccountData) -> Unit,
+    onSuccess: (accountData: Account) -> Unit,
     isCreating: Boolean
 ) {
     val focusManager = LocalFocusManager.current
@@ -119,7 +116,7 @@ private fun CreateAccountBody(
     ) {
 
         OutlinedTextField(
-            value = uiState.accountData.name,
+            value = uiState.account.name,
             onValueChange = { viewModel.updateUserName(it) },
             label = {
                 Text(stringResource(R.string.name))
@@ -141,7 +138,7 @@ private fun CreateAccountBody(
         )
 
         OutlinedTextField(
-            value = uiState.accountData.currentBalance,
+            value = uiState.account.currentBalance,
             onValueChange = { viewModel.updateCurrentBalance(it) },
             supportingText = {
                 if (uiState.currentBalanceError != null)
@@ -163,7 +160,7 @@ private fun CreateAccountBody(
             modifier = Modifier.fillMaxWidth()
         )
 
-        DatePickerField(date = uiState.accountData.dateOfCurrentBalance,
+        DatePickerField(date = uiState.account.dateOfCurrentBalance,
             label = stringResource(R.string.date_of_current_balance),
             supportingText = {
                 if (uiState.dateOfCurrentBalanceError != null)
@@ -188,7 +185,7 @@ private fun CreateAccountBody(
             onExpandedChange = { viewModel.updateAccountTypeExpanded(it) },
             onDismissRequest = { viewModel.updateAccountTypeExpanded(isExpanded = false) },
             onSelectType = { viewModel.updateAccountType(type = it) },
-            selectedItem = uiState.accountData.selectedAccountType
+            selectedItem = uiState.account.selectedAccountType
         )
 
         Column(
@@ -207,7 +204,7 @@ private fun CreateAccountBody(
                     }
             ) {
                 RadioButton(
-                    selected = uiState.accountData.selectedBudget == BudgetType.BudgetAccount,
+                    selected = uiState.account.selectedBudget == BudgetType.BudgetAccount,
                     onClick = {
                         viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
                     },
@@ -235,7 +232,7 @@ private fun CreateAccountBody(
                     }
             ) {
                 RadioButton(
-                    selected = uiState.accountData.selectedBudget == BudgetType.OffBudget,
+                    selected = uiState.account.selectedBudget == BudgetType.OffBudget,
                     onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) },
                     modifier =
                     Modifier.size(CHECKBOX_SIZE_SMALL)
@@ -267,7 +264,7 @@ private fun CreateAccountBody(
             onClick = {
                 viewModel.createAccount {
                     if (it) {
-                        onSuccess(uiState.accountData)
+                        onSuccess(uiState.account)
                     } else
                         Toast.makeText(
                             context,
@@ -313,7 +310,9 @@ private fun AccountTypeDropDownMenu(
         )
 
         ExposedDropdownMenu(
-            expanded = expanded, onDismissRequest = onDismissRequest
+            expanded = expanded,
+            onDismissRequest = onDismissRequest,
+            modifier = Modifier.background(MaterialTheme.colorScheme.background)
         ) {
             listItems.forEach { selectedOption ->
                 DropdownMenuItem(

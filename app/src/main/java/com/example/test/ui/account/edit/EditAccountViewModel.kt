@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
-import com.example.test.domain.models.AccountData
+import com.example.test.domain.models.Account
 import com.example.test.domain.usecase.AccountUseCases
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,10 +18,10 @@ class EditAccountViewModel(
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-    fun updateAccountData(accountData: AccountData) {
+    fun updateAccountData(accountData: Account) {
         _uiState.update {
             it.copy(
-                accountData = accountData
+                account = accountData
             )
         }
     }
@@ -29,7 +29,7 @@ class EditAccountViewModel(
     fun updateUserName(name: String) {
         _uiState.update {
             it.copy(
-                accountData = it.accountData.copy(name = name),
+                account = it.account.copy(name = name),
                 nameError = validateName(name)
             )
         }
@@ -38,7 +38,7 @@ class EditAccountViewModel(
     fun updateCurrentBalance(balance: String) {
         _uiState.update {
             it.copy(
-                accountData = it.accountData.copy(currentBalance = balance),
+                account = it.account.copy(currentBalance = balance),
                 currentBalanceError = validateCurrentBalance(balance)
             )
         }
@@ -47,7 +47,7 @@ class EditAccountViewModel(
     fun updateCurrentDate(date: String) {
         _uiState.update {
             it.copy(
-                accountData = it.accountData.copy(dateOfCurrentBalance = date),
+                account = it.account.copy(dateOfCurrentBalance = date),
                 dateOfCurrentBalanceError = validateDate(date)
             )
         }
@@ -57,7 +57,7 @@ class EditAccountViewModel(
         _uiState.update {
             it.copy(
                 accountTypeMenuExpanded = false,
-                accountData = it.accountData.copy(selectedAccountType = type),
+                account = it.account.copy(selectedAccountType = type),
                 selectedAccountTypeError = validateAccountType(type)
             )
         }
@@ -66,7 +66,7 @@ class EditAccountViewModel(
     fun updateBudgetType(budgetType: BudgetType) {
         _uiState.update {
             it.copy(
-                accountData = it.accountData.copy(selectedBudget = budgetType),
+                account = it.account.copy(selectedBudget = budgetType),
                 selectedBudgetError = validateBudgetType(budgetType)
             )
         }
@@ -84,11 +84,11 @@ class EditAccountViewModel(
         // Валидация всех полей
         _uiState.update {
             it.copy(
-                selectedAccountTypeError = validateAccountType(uiState.value.accountData.selectedAccountType),
-                selectedBudgetError = validateBudgetType(uiState.value.accountData.selectedBudget),
-                nameError = validateName(uiState.value.accountData.name),
-                dateOfCurrentBalanceError = validateDate(uiState.value.accountData.dateOfCurrentBalance),
-                currentBalanceError = validateCurrentBalance(uiState.value.accountData.currentBalance),
+                selectedAccountTypeError = validateAccountType(uiState.value.account.selectedAccountType),
+                selectedBudgetError = validateBudgetType(uiState.value.account.selectedBudget),
+                nameError = validateName(uiState.value.account.name),
+                dateOfCurrentBalanceError = validateDate(uiState.value.account.dateOfCurrentBalance),
+                currentBalanceError = validateCurrentBalance(uiState.value.account.currentBalance),
             )
         }
         val noErrors: Boolean =
@@ -101,7 +101,7 @@ class EditAccountViewModel(
             }
         // Отправляем наличие ошибок
         viewModelScope.launch {
-            accountUseCases.addAccount(account = uiState.value.accountData)
+            accountUseCases.addAccount(account = uiState.value.account)
             // Проверил все ли работает
             onValidated(noErrors)
         }
@@ -109,7 +109,7 @@ class EditAccountViewModel(
 
     //TODO: Уточнить типы данных по всем полям
     data class UiState(
-        val accountData: AccountData = AccountData(
+        val account: Account = Account(
             name = "",
             currentBalance = "",
             dateOfCurrentBalance = "",

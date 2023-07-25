@@ -1,7 +1,7 @@
 package com.example.test.di
 
 import androidx.room.Room
-import com.example.test.data.data_source.AccountDatabase
+import com.example.test.data.database.AccountDatabase
 import com.example.test.data.repository.AccountRepositoryImpl
 import com.example.test.domain.repository.AccountRepository
 import com.example.test.domain.usecase.AccountUseCases

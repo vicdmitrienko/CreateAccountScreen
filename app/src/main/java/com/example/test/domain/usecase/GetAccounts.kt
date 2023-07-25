@@ -4,6 +4,6 @@ import com.example.test.domain.repository.AccountRepository
 
 class GetAccounts(private val repository: AccountRepository) {
     operator fun invoke() {
-        repository.getAccounts()
+        repository.getAllAsFlow()
     }
 }

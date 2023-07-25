@@ -1,5 +1,6 @@
 package com.example.test.ui.result
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,44 +12,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.example.test.R
-import com.example.test.domain.models.AccountData
+import com.example.test.domain.models.Account
 import com.example.test.ui.theme.PADDING_MED
 
 @Composable
 fun ResultScreen(
-    accountData: AccountData? = null,
-    onCreateOrEditAccount: (accountData: AccountData?) -> Unit
+    account: Account? = null,
+    onCreateOrEditAccount: (accountData: Account?) -> Unit
 ) {
-    var buttonText: String
+    val buttonText: String
+    val bodyText: String
+
+    if (account == null) {
+        buttonText = stringResource(id = R.string.create_account)
+        bodyText = stringResource(R.string.account_not_created)
+    } else {
+        buttonText = stringResource(id = R.string.update_account)
+        bodyText = "user name = ${account.name}\n" +
+                "current balance = ${account.currentBalance}\n" +
+                "date = ${account.dateOfCurrentBalance}\n" +
+                "account type = ${account.selectedAccountType.type}\n" +
+                "budget type = ${account.selectedBudget?.type}\n"
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(
             space = PADDING_MED, alignment = Alignment.CenterVertically
         ),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
-        //TODO: В сложных (насыщенных логикой экранах) могу предложить разделить:
-        // 1. Сначала подготовить данные в переменные
-        // 2. Потом уже композицию из UI-элементов выстраивать
-        // так может оказаться чище для написания, чтения и поддержания кода в рабочем состоянии.
-
-        buttonText = if (accountData == null) {// Проверяем пришли ли данные
-            Text(stringResource(R.string.account_not_created))
-            stringResource(id = R.string.create_account)
-        } else {
-            Text(
-                text = "user name = ${accountData.name}\n"
-                        + "current balance = ${accountData.currentBalance}\n"
-                        + "date = ${accountData.dateOfCurrentBalance}\n"
-                        + "account type = ${accountData.selectedAccountType.type}\n"
-                        + "budget type = ${accountData.selectedBudget?.type}\n",
-                style = MaterialTheme.typography.titleMedium
-            )
-            stringResource(id = R.string.update_account)
-        }
+        Text(bodyText, color = MaterialTheme.colorScheme.onBackground)
         Button(onClick = {
             // Передаем данные аккаунта
-            onCreateOrEditAccount(accountData)
+            onCreateOrEditAccount(account)
         }) {
             Text(buttonText)
         }
