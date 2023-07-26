@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.example.test.R
-import com.example.test.domain.models.Account
+import com.example.test.data.database.entities.Account
 import com.example.test.ui.theme.PADDING_MED
 
 @Composable

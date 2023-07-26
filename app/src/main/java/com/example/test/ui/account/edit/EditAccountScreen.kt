@@ -4,7 +4,9 @@ import android.app.DatePickerDialog
 import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -48,12 +51,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.test.R
+import com.example.test.data.database.entities.Account
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
-import com.example.test.domain.models.Account
 import com.example.test.ui.common.components.CommonAppBar
 import com.example.test.ui.theme.AppTheme
+import com.example.test.ui.theme.BORDER_SIZE_SMALL
 import com.example.test.ui.theme.CHECKBOX_SIZE_SMALL
+import com.example.test.ui.theme.CORNER_RADIUS_SMALL
 import com.example.test.ui.theme.PADDING_BIG
 import com.example.test.ui.theme.PADDING_MED
 import com.example.test.ui.theme.PADDING_SMALL
@@ -72,6 +77,8 @@ fun EditAccountScreen(
     thisViewModel: EditAccountViewModel = koinViewModel()
 ) {
     val uiState by thisViewModel.uiState.collectAsState()
+    val title = if (account == null) stringResource(R.string.create_account)
+    else stringResource(R.string.update_account)
 
     account?.let {
         LaunchedEffect(it) {
@@ -80,8 +87,6 @@ fun EditAccountScreen(
         }
     }
 
-    val title = if (account == null) stringResource(R.string.create_account)
-                else stringResource(R.string.update_account)
     Scaffold(topBar = {
         CommonAppBar(title = title, onBackClick = onCancel)
     }) { padding ->
@@ -151,7 +156,7 @@ private fun CreateAccountBody(
                 Text(stringResource(R.string.current_balance))
             },
             placeholder = {
-                Text(stringResource(R.string._0_00))
+                Text(stringResource(R.string.balance_format))
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
@@ -258,17 +263,17 @@ private fun CreateAccountBody(
         }
 
         val buttonText = if (isCreating) stringResource(R.string.create_account)
-                         else stringResource(R.string.update_account)
+        else stringResource(R.string.update_account)
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 viewModel.createAccount {
-                    if (it) {
+                    if (it)
                         onSuccess(uiState.account)
-                    } else
+                    else
                         Toast.makeText(
                             context,
-                            "Check fields",
+                            "Check the fields",
                             Toast.LENGTH_LONG
                         ).show()
                 }
@@ -312,7 +317,15 @@ private fun AccountTypeDropDownMenu(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = onDismissRequest,
-            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(CORNER_RADIUS_SMALL)
+                )
+                .border(
+                    border = BorderStroke(BORDER_SIZE_SMALL, MaterialTheme.colorScheme.primary),
+                    shape = RoundedCornerShape(CORNER_RADIUS_SMALL)
+                )
         ) {
             listItems.forEach { selectedOption ->
                 DropdownMenuItem(
