@@ -22,12 +22,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
@@ -62,6 +65,7 @@ import com.example.test.ui.theme.CORNER_RADIUS_SMALL
 import com.example.test.ui.theme.PADDING_BIG
 import com.example.test.ui.theme.PADDING_MED
 import com.example.test.ui.theme.PADDING_SMALL
+import com.example.test.ui.theme.SPACE_MED
 import org.koin.androidx.compose.koinViewModel
 import java.util.Calendar
 import java.util.Date
@@ -74,6 +78,7 @@ fun EditAccountScreen(
     account: Account? = null,
     onSuccess: (Account) -> Unit,
     onCancel: () -> Unit,
+    onDelete: () -> Unit,
     thisViewModel: EditAccountViewModel = koinViewModel()
 ) {
     val uiState by thisViewModel.uiState.collectAsState()
@@ -95,6 +100,7 @@ fun EditAccountScreen(
             uiState = uiState,
             viewModel = thisViewModel,
             onSuccess = onSuccess,
+            onDelete = onDelete,
             isCreating = account == null
         )
     }
@@ -107,12 +113,14 @@ private fun CreateAccountBody(
     uiState: EditAccountViewModel.UiState,
     viewModel: EditAccountViewModel,
     onSuccess: (accountData: Account) -> Unit,
+    onDelete: () -> Unit,
     isCreating: Boolean
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val buttonConfirmText = if (isCreating) stringResource(R.string.create_account)
+    else stringResource(R.string.update_account)
 
-    //FIXME: Не хватает скроллинга при экранной клавиатуре
 
     Column(
         modifier = Modifier
@@ -264,8 +272,6 @@ private fun CreateAccountBody(
             }
         }
 
-        val buttonText = if (isCreating) stringResource(R.string.create_account)
-        else stringResource(R.string.update_account)
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
@@ -281,7 +287,84 @@ private fun CreateAccountBody(
                 }
             }
         ) {
-            Text(buttonText)
+            Text(buttonConfirmText)
+        }
+
+        if (!isCreating)
+            Button(
+                onClick = { viewModel.openDeleteDialog() },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text("Delete account")
+            }
+    }
+    if (uiState.deleteDialogOpened)
+        AlertDialog(
+            title = {
+                Text(
+                    text = "Confirm action",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to delete the account?",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            buttons =
+            {
+                DialogButtons(
+                    onConfirm = onDelete,
+                    onDismissRequest = { viewModel.closeDeleteDialog() },
+                    confirmButtonText = "Delete",
+                    dismissButtonText = "No",
+                    confirmButtonColors = ButtonDefaults
+                        .buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                )
+            },
+            onDismissRequest = { viewModel.closeDeleteDialog() },
+            backgroundColor = MaterialTheme.colorScheme.background
+        )
+}
+
+
+@Composable
+private fun DialogButtons(
+    onConfirm: () -> Unit,
+    onDismissRequest: () -> Unit,
+    confirmButtonText: String,
+    dismissButtonText: String,
+    confirmButtonColors: ButtonColors = ButtonDefaults.buttonColors(),
+    dismissButtonColors: ButtonColors = ButtonDefaults.buttonColors(),
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(SPACE_MED),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(PADDING_BIG)
+    ) {
+        Button(
+            onClick = onConfirm,
+            colors = confirmButtonColors,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                confirmButtonText,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        Button(
+            onClick = onDismissRequest,
+            colors = dismissButtonColors,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                dismissButtonText,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }
@@ -392,6 +475,7 @@ private fun DatePickerField(
 @Composable
 private fun CreateAccountPreview() {
     AppTheme(darkTheme = false) {
-        EditAccountScreen(onCancel = {}, onSuccess = {})
+        EditAccountScreen(onCancel = {}, onSuccess = {}, onDelete = {})
     }
 }
+

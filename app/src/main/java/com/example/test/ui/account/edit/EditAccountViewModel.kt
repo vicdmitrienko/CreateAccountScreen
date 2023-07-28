@@ -8,10 +8,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class EditAccountViewModel: ViewModel() {
+class EditAccountViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
+
+    fun openDeleteDialog() {
+        _uiState.update {
+            it.copy(
+                deleteDialogOpened = true
+            )
+        }
+    }
+
+    fun closeDeleteDialog() {
+        _uiState.update {
+            it.copy(
+                deleteDialogOpened = false
+            )
+        }
+    }
 
     fun updateAccountData(accountData: Account) {
         _uiState.update {
@@ -107,6 +123,7 @@ class EditAccountViewModel: ViewModel() {
             selectedBudget = null,
             selectedAccountType = AccountType.NONE
         ),
+        val deleteDialogOpened: Boolean = false,
         val nameError: String? = null,
         val currentBalanceError: String? = null,
         val dateOfCurrentBalanceError: String? = null,

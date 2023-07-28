@@ -7,7 +7,6 @@ import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
 import kotlinx.parcelize.Parcelize
 
-//TODO: Переименовать файл
 
 @Entity
 @Parcelize

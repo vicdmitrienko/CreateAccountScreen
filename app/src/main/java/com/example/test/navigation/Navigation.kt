@@ -2,6 +2,8 @@ package com.example.test.navigation
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -10,7 +12,10 @@ import com.example.test.data.enums.AccountAction
 import com.example.test.data.enums.AccountsListMode
 import com.example.test.ui.account.edit.EditAccountScreen
 import com.example.test.ui.account.list.AccountsListScreen
+import com.example.test.ui.account.list.AccountsListViewModel
 import com.example.test.ui.account.menu.MenuScreen
+import com.example.test.ui.account.menu.MenuViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -34,6 +39,13 @@ fun Navigation() {
                         set("action", action)
                     }
                     navController.popBackStack()
+                },
+                onDelete = {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        "action",
+                        AccountAction.Deleted
+                    )
+                    navController.popBackStack()
                 }
             )
         }
@@ -47,8 +59,12 @@ fun Navigation() {
             Log.d("navLog", mode.toString())
             // Сформируем экран с результатами
             mode?.let {
+                val vm: AccountsListViewModel = koinViewModel()
+                val uiState by vm.uiState.collectAsState()
                 AccountsListScreen(
+                    uiState = uiState,
                     account = account,
+                    onIntent = vm::handle,
                     action = action,
                     mode = AccountsListMode.valueOf(mode),
                     onAccountClick = { acc ->
@@ -81,8 +97,12 @@ fun Navigation() {
 
         composable(Screen.MenuScreen.route) { entry ->
             val accountId: Int? = entry.savedStateHandle.get<Int>("account_id")
+            val vm: MenuViewModel = koinViewModel()
+            val uiState by vm.uiState.collectAsState()
             MenuScreen(
                 accountId = accountId,
+                uiState = uiState,
+                onIntent = vm::handle,
                 onAccountsClick = {
                     navController.navigate("${Screen.AccountsListScreen.route}/${AccountsListMode.Editing}")
                 },

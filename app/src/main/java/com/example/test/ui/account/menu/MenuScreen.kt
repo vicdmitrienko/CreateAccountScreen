@@ -11,27 +11,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.test.R
+import com.example.test.ui.theme.AppTheme
 import com.example.test.ui.theme.PADDING_BIG
 import com.example.test.ui.theme.SPACE_MED
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MenuScreen(
-    thisViewModel: MenuViewModel = koinViewModel(),
+    uiState: MenuViewModel.UiState,
+    onIntent: (MenuIntent) -> Unit,
     onChoiceClick: () -> Unit,
     onAccountsClick: () -> Unit,
     accountId: Int? = null,
 ) {
-    val uiState by thisViewModel.uiState.collectAsState()
     accountId?.let {
         LaunchedEffect(it) {
-            thisViewModel.updateActiveAccount(accountId)
+            onIntent(MenuIntent.UpdateActiveAccount(it))
         }
     }
 
@@ -70,6 +69,19 @@ fun MenuScreen(
             else stringResource(R.string.account_active) + uiState.accountName,
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+@Preview
+fun MenuPrev() {
+    AppTheme() {
+        MenuScreen(
+            onChoiceClick = { /*TODO*/ },
+            onAccountsClick = { /*TODO*/ },
+            uiState = MenuViewModel.UiState(),
+            onIntent = {}
         )
     }
 }
