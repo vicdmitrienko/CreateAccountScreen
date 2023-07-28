@@ -1,5 +1,6 @@
 package com.example.test.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,46 +38,45 @@ fun Navigation() {
             )
         }
 
-        composable(Screen.AccountsListScreen.route) { entry ->
+        composable("${Screen.AccountsListScreen.route}/{mode}") { entry ->
             // Получим из сохранённых значений данные об аккаунте
             val account: Account? = entry.savedStateHandle.get<Account>("account")
             val action: AccountAction? = entry.savedStateHandle.get<AccountAction>("action")
             // Режим работы
-            val mode: AccountsListMode? =
-                navController
-                    .previousBackStackEntry?.savedStateHandle?.get<AccountsListMode>("mode")
+            val mode = entry.arguments?.getString("mode")
+            Log.d("navLog", mode.toString())
             // Сформируем экран с результатами
-            AccountsListScreen(
-                account = account,
-                action = action,
-                mode = mode,
-                onAccountClick = { acc ->
-                    when (mode) {
-                        AccountsListMode.Editing -> {
-                            // acc == null -> Создание
-                            // acc != null -> Редактирование
-                            entry.savedStateHandle["account"] = acc
-                            // Перейдём на экран создания/редактирования
-                            navController.navigate(Screen.AccountCreateScreen.route)
-                        }
+            mode?.let {
+                AccountsListScreen(
+                    account = account,
+                    action = action,
+                    mode = AccountsListMode.valueOf(mode),
+                    onAccountClick = { acc ->
+                        when (AccountsListMode.valueOf(mode)) {
+                            AccountsListMode.Editing -> {
+                                // acc == null -> Создание
+                                // acc != null -> Редактирование
+                                entry.savedStateHandle["account"] = acc
+                                // Перейдём на экран создания/редактирования
+                                navController.navigate(Screen.AccountCreateScreen.route)
+                            }
 
-                        AccountsListMode.Choice -> {
-                            // Передаем account Id
-                            navController.previousBackStackEntry?.savedStateHandle?.set(
-                                "account_id",
-                                acc?.id
-                            )
-                            // Возвращаемся на предыдущий экран
-                            navController.popBackStack()
+                            AccountsListMode.Choice -> {
+                                // Передаем account Id
+                                navController.previousBackStackEntry?.savedStateHandle?.set(
+                                    "account_id",
+                                    acc?.id
+                                )
+                                // Возвращаемся на предыдущий экран
+                                navController.popBackStack()
+                            }
                         }
-
-                        else -> {}
+                    },
+                    onCancel = {
+                        navController.popBackStack()
                     }
-                },
-                onCancel = {
-                    navController.popBackStack()
-                }
-            )
+                )
+            }
         }
 
         composable(Screen.MenuScreen.route) { entry ->
@@ -84,12 +84,10 @@ fun Navigation() {
             MenuScreen(
                 accountId = accountId,
                 onAccountsClick = {
-                    entry.savedStateHandle["mode"] = AccountsListMode.Editing
-                    navController.navigate(Screen.AccountsListScreen.route)
+                    navController.navigate("${Screen.AccountsListScreen.route}/${AccountsListMode.Editing}")
                 },
                 onChoiceClick = {
-                    entry.savedStateHandle["mode"] = AccountsListMode.Choice
-                    navController.navigate(Screen.AccountsListScreen.route)
+                    navController.navigate("${Screen.AccountsListScreen.route}/${AccountsListMode.Choice}")
                 }
             )
         }

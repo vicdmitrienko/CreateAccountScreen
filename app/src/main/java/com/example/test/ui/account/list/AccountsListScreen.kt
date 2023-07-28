@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -46,62 +45,51 @@ import org.koin.androidx.compose.koinViewModel
 fun AccountsListScreen(
     thisViewModel: AccountsListViewModel = koinViewModel(),
     onAccountClick: (Account?) -> Unit,
-    mode: AccountsListMode?,
+    mode: AccountsListMode,
     account: Account? = null,
     action: AccountAction? = null,
     onCancel: () -> Unit
 ) {
-    // Прогресс бар при переходе между экранами
-    if (mode == null) {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-    } else {
 
-        val uiState by thisViewModel.uiState.collectAsState()
-        val title = if (mode == AccountsListMode.Editing) stringResource(R.string.editing)
-        else stringResource(R.string.choice)
 
-        account?.let {
-            LaunchedEffect(it) {
-                when (action) {
-                    AccountAction.Created -> thisViewModel.addAccount(it)
-                    AccountAction.Updated -> thisViewModel.editAccount(it)
-                    else -> {}
-                }
+    val uiState by thisViewModel.uiState.collectAsState()
+    val title = if (mode == AccountsListMode.Editing) stringResource(R.string.editing)
+    else stringResource(R.string.choice)
+
+    account?.let {
+        LaunchedEffect(it) {
+            when (action) {
+                AccountAction.Created -> thisViewModel.addAccount(it)
+                AccountAction.Updated -> thisViewModel.editAccount(it)
+                else -> {}
             }
         }
-
-        Scaffold(
-            topBar = {
-                CommonAppBar(title = title, onBackClick = onCancel)
-            },
-            floatingActionButton = {
-                if (mode == AccountsListMode.Editing)
-                    FloatingActionButton(onClick = { onAccountClick(null) }) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = "addIcon"
-                        )
-                    }
-            },
-            floatingActionButtonPosition = FabPosition.End
-        ) { padding ->
-            AccountsListBody(
-                padding = padding,
-                mode = mode,
-                uiState = uiState,
-                thisViewModel = thisViewModel,
-                onAccountClick = onAccountClick
-            )
-        }
     }
+
+    Scaffold(
+        topBar = {
+            CommonAppBar(title = title, onBackClick = onCancel)
+        },
+        floatingActionButton = {
+            if (mode == AccountsListMode.Editing)
+                FloatingActionButton(onClick = { onAccountClick(null) }) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "addIcon"
+                    )
+                }
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) { padding ->
+        AccountsListBody(
+            padding = padding,
+            mode = mode,
+            uiState = uiState,
+            thisViewModel = thisViewModel,
+            onAccountClick = onAccountClick
+        )
+    }
+
 }
 
 
