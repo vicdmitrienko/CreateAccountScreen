@@ -2,12 +2,9 @@ package com.example.test.di
 
 import androidx.room.Room
 import com.example.test.data.database.AccountDatabase
-import com.example.test.data.repository.AccountRepositoryImpl
-import com.example.test.domain.repository.AccountRepository
-import com.example.test.domain.usecase.AccountUseCases
-import com.example.test.domain.usecase.AddAccount
-import com.example.test.domain.usecase.GetAccounts
 import com.example.test.ui.account.edit.EditAccountViewModel
+import com.example.test.ui.account.list.AccountsListViewModel
+import com.example.test.ui.account.menu.MenuViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -15,7 +12,15 @@ import org.koin.dsl.module
 val appModule = module {
 
     viewModel {
-        EditAccountViewModel(get())
+        EditAccountViewModel()
+    }
+
+    viewModel {
+        AccountsListViewModel(get())
+    }
+
+    viewModel {
+        MenuViewModel(get())
     }
 
     single {
@@ -28,16 +33,5 @@ val appModule = module {
 
     single {
         get<AccountDatabase>().accountDao
-    }
-
-    single<AccountRepository> {
-        AccountRepositoryImpl(get())
-    }
-
-    single {
-        AccountUseCases(
-            addAccount = AddAccount(get()),
-            getAccounts = GetAccounts(get())
-        )
     }
 }

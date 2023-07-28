@@ -1,19 +1,14 @@
 package com.example.test.ui.account.edit
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.example.test.data.database.entities.Account
 import com.example.test.data.enums.AccountType
 import com.example.test.data.enums.BudgetType
-import com.example.test.domain.models.Account
-import com.example.test.domain.usecase.AccountUseCases
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
-class EditAccountViewModel(
-    private val accountUseCases: AccountUseCases
-) : ViewModel() {
+class EditAccountViewModel: ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -100,11 +95,7 @@ class EditAccountViewModel(
                         && selectedBudgetError == null)
             }
         // Отправляем наличие ошибок
-        viewModelScope.launch {
-            accountUseCases.addAccount(account = uiState.value.account)
-            // Проверил все ли работает
-            onValidated(noErrors)
-        }
+        onValidated(noErrors)
     }
 
     //TODO: Уточнить типы данных по всем полям
