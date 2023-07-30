@@ -11,6 +11,7 @@ import com.example.test.data.database.entities.Account
 import com.example.test.data.enums.AccountAction
 import com.example.test.data.enums.AccountsListMode
 import com.example.test.ui.account.edit.EditAccountScreen
+import com.example.test.ui.account.edit.EditAccountViewModel
 import com.example.test.ui.account.list.AccountsListScreen
 import com.example.test.ui.account.list.AccountsListViewModel
 import com.example.test.ui.account.menu.MenuScreen
@@ -24,6 +25,8 @@ fun Navigation() {
     NavHost(navController = navController, startDestination = Screen.MenuScreen.route) {
 
         composable(Screen.AccountCreateScreen.route) {
+            val vm: EditAccountViewModel = koinViewModel()
+            val uiState by vm.uiState.collectAsState()
             // Решил использовать Parcelable, так как он быстрее
             // и менее затратный по памяти
             val accountObject: Account? =
@@ -31,6 +34,8 @@ fun Navigation() {
             val action = if (accountObject == null) AccountAction.Created else AccountAction.Updated
             // Если сохранили данные счета, то передаем в экран
             EditAccountScreen(
+                uiState = uiState,
+                onIntent = vm::handle,
                 account = accountObject,
                 onCancel = { navController.popBackStack() }, // При отмене возвращаемся на предыдущий экран
                 onSuccess = {// При успехе отправляем данные на предыдущий экран и возвращаемся на него

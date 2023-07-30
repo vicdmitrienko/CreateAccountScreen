@@ -41,8 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -66,7 +64,6 @@ import com.example.test.ui.theme.PADDING_BIG
 import com.example.test.ui.theme.PADDING_MED
 import com.example.test.ui.theme.PADDING_SMALL
 import com.example.test.ui.theme.SPACE_MED
-import org.koin.androidx.compose.koinViewModel
 import java.util.Calendar
 import java.util.Date
 
@@ -79,15 +76,15 @@ fun EditAccountScreen(
     onSuccess: (Account) -> Unit,
     onCancel: () -> Unit,
     onDelete: () -> Unit,
-    thisViewModel: EditAccountViewModel = koinViewModel()
+    onIntent: (EditIntent) -> Unit,
+    uiState: EditAccountViewModel.UiState
 ) {
-    val uiState by thisViewModel.uiState.collectAsState()
     val title = if (account == null) stringResource(R.string.create_account)
     else stringResource(R.string.update_account)
 
     account?.let {
         LaunchedEffect(it) {
-            thisViewModel.updateAccountData(account)
+            onIntent(EditIntent.UpdateAccountData(it))
             Log.e(TAG, "thisViewModel.updateAccountData(accountData)")
         }
     }
@@ -98,7 +95,7 @@ fun EditAccountScreen(
         CreateAccountBody(
             padding = padding,
             uiState = uiState,
-            viewModel = thisViewModel,
+            onIntent = onIntent,
             onSuccess = onSuccess,
             onDelete = onDelete,
             isCreating = account == null
@@ -111,7 +108,7 @@ fun EditAccountScreen(
 private fun CreateAccountBody(
     padding: PaddingValues,
     uiState: EditAccountViewModel.UiState,
-    viewModel: EditAccountViewModel,
+    onIntent: (EditIntent) -> Unit,
     onSuccess: (accountData: Account) -> Unit,
     onDelete: () -> Unit,
     isCreating: Boolean
@@ -132,7 +129,7 @@ private fun CreateAccountBody(
 
         OutlinedTextField(
             value = uiState.account.name,
-            onValueChange = { viewModel.updateUserName(it) },
+            onValueChange = { onIntent(EditIntent.UpdateUserName(it)) },
             label = {
                 Text(stringResource(R.string.name))
             },
@@ -154,7 +151,7 @@ private fun CreateAccountBody(
 
         OutlinedTextField(
             value = uiState.account.currentBalance,
-            onValueChange = { viewModel.updateCurrentBalance(it) },
+            onValueChange = { onIntent(EditIntent.UpdateCurrentBalance(it)) },
             supportingText = {
                 if (uiState.currentBalanceError != null)
                     Text(uiState.currentBalanceError)
@@ -184,22 +181,22 @@ private fun CreateAccountBody(
             isError = uiState.dateOfCurrentBalanceError != null,
             onDateChanged = { year, month, day ->
                 when {
-                    day < 10 && month < 10 -> viewModel.updateCurrentDate("0$day.0$month.$year")
+                    day < 10 && month < 10 -> onIntent(EditIntent.UpdateCurrentDate("0$day.0$month.$year"))
 
-                    day < 10 -> viewModel.updateCurrentDate("0$day.$month.$year")
+                    day < 10 -> onIntent(EditIntent.UpdateCurrentDate("0$day.$month.$year"))
 
-                    month < 10 -> viewModel.updateCurrentDate("$day.0$month.$year")
+                    month < 10 -> onIntent(EditIntent.UpdateCurrentDate("$day.0$month.$year"))
 
-                    else -> viewModel.updateCurrentDate("$day.$month.$year")
+                    else -> onIntent(EditIntent.UpdateCurrentDate("$day.$month.$year"))
                 }
             })
 
         AccountTypeDropDownMenu(
             expanded = uiState.accountTypeMenuExpanded,
             isError = uiState.selectedAccountTypeError != null,
-            onExpandedChange = { viewModel.updateAccountTypeExpanded(it) },
-            onDismissRequest = { viewModel.updateAccountTypeExpanded(isExpanded = false) },
-            onSelectType = { viewModel.updateAccountType(type = it) },
+            onExpandedChange = { onIntent(EditIntent.UpdateAccountTypeExpanded(it)) },
+            onDismissRequest = { onIntent(EditIntent.UpdateAccountTypeExpanded(false)) },
+            onSelectType = { onIntent(EditIntent.UpdateAccountType(it)) },
             selectedItem = uiState.account.selectedAccountType
         )
 
@@ -215,13 +212,13 @@ private fun CreateAccountBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
+                        onIntent(EditIntent.UpdateBudgetType(BudgetType.BudgetAccount))
                     }
             ) {
                 RadioButton(
                     selected = uiState.account.selectedBudget == BudgetType.BudgetAccount,
                     onClick = {
-                        viewModel.updateBudgetType(budgetType = BudgetType.BudgetAccount)
+                        onIntent(EditIntent.UpdateBudgetType(BudgetType.BudgetAccount))
                     },
                     modifier =
                     Modifier.size(CHECKBOX_SIZE_SMALL)
@@ -243,12 +240,12 @@ private fun CreateAccountBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        viewModel.updateBudgetType(budgetType = BudgetType.OffBudget)
+                        onIntent(EditIntent.UpdateBudgetType(BudgetType.OffBudget))
                     }
             ) {
                 RadioButton(
                     selected = uiState.account.selectedBudget == BudgetType.OffBudget,
-                    onClick = { viewModel.updateBudgetType(budgetType = BudgetType.OffBudget) },
+                    onClick = { onIntent(EditIntent.UpdateBudgetType(BudgetType.OffBudget)) },
                     modifier =
                     Modifier.size(CHECKBOX_SIZE_SMALL)
                 )
@@ -275,16 +272,17 @@ private fun CreateAccountBody(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                viewModel.createAccount {
-                    if (it)
-                        onSuccess(uiState.account)
-                    else
-                        Toast.makeText(
-                            context,
-                            "Check the fields",
-                            Toast.LENGTH_LONG
-                        ).show()
-                }
+                onIntent(
+                    EditIntent.CreateAccount {
+                        if (it)
+                            onSuccess(uiState.account)
+                        else
+                            Toast.makeText(
+                                context,
+                                "Check the fields",
+                                Toast.LENGTH_LONG
+                            ).show()
+                    })
             }
         ) {
             Text(buttonConfirmText)
@@ -292,7 +290,7 @@ private fun CreateAccountBody(
 
         if (!isCreating)
             Button(
-                onClick = { viewModel.openDeleteDialog() },
+                onClick = { onIntent(EditIntent.OpenDeleteDialog) },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -318,14 +316,14 @@ private fun CreateAccountBody(
             {
                 DialogButtons(
                     onConfirm = onDelete,
-                    onDismissRequest = { viewModel.closeDeleteDialog() },
+                    onDismissRequest = { onIntent(EditIntent.CloseDeleteDialog) },
                     confirmButtonText = "Delete",
                     dismissButtonText = "No",
                     confirmButtonColors = ButtonDefaults
                         .buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 )
             },
-            onDismissRequest = { viewModel.closeDeleteDialog() },
+            onDismissRequest = { onIntent(EditIntent.CloseDeleteDialog) },
             backgroundColor = MaterialTheme.colorScheme.background
         )
 }
@@ -475,7 +473,13 @@ private fun DatePickerField(
 @Composable
 private fun CreateAccountPreview() {
     AppTheme(darkTheme = false) {
-        EditAccountScreen(onCancel = {}, onSuccess = {}, onDelete = {})
+        EditAccountScreen(
+            onCancel = {},
+            onSuccess = {},
+            onDelete = {},
+            uiState = EditAccountViewModel.UiState(),
+            onIntent = {}
+        )
     }
 }
 
