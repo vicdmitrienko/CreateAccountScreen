@@ -8,12 +8,43 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class EditAccountViewModel: ViewModel() {
+class EditAccountViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-    fun updateAccountData(accountData: Account) {
+    fun handle(intent: EditIntent) {
+        when (intent) {
+            is EditIntent.OpenDeleteDialog -> openDeleteDialog()
+            is EditIntent.CloseDeleteDialog -> closeDeleteDialog()
+            is EditIntent.UpdateAccountData -> updateAccountData(intent.account)
+            is EditIntent.UpdateUserName -> updateUserName(intent.name)
+            is EditIntent.UpdateCurrentBalance -> updateCurrentBalance(intent.balance)
+            is EditIntent.UpdateCurrentDate -> updateCurrentDate(intent.date)
+            is EditIntent.UpdateAccountType -> updateAccountType(intent.type)
+            is EditIntent.UpdateBudgetType -> updateBudgetType(intent.budget)
+            is EditIntent.UpdateAccountTypeExpanded -> updateAccountTypeExpanded(intent.isExpanded)
+            is EditIntent.CreateAccount -> createAccount(intent.onValidated)
+        }
+    }
+
+    private fun openDeleteDialog() {
+        _uiState.update {
+            it.copy(
+                deleteDialogOpened = true
+            )
+        }
+    }
+
+    private fun closeDeleteDialog() {
+        _uiState.update {
+            it.copy(
+                deleteDialogOpened = false
+            )
+        }
+    }
+
+    private fun updateAccountData(accountData: Account) {
         _uiState.update {
             it.copy(
                 account = accountData
@@ -21,7 +52,7 @@ class EditAccountViewModel: ViewModel() {
         }
     }
 
-    fun updateUserName(name: String) {
+    private fun updateUserName(name: String) {
         _uiState.update {
             it.copy(
                 account = it.account.copy(name = name),
@@ -30,7 +61,7 @@ class EditAccountViewModel: ViewModel() {
         }
     }
 
-    fun updateCurrentBalance(balance: String) {
+    private fun updateCurrentBalance(balance: String) {
         _uiState.update {
             it.copy(
                 account = it.account.copy(currentBalance = balance),
@@ -39,7 +70,7 @@ class EditAccountViewModel: ViewModel() {
         }
     }
 
-    fun updateCurrentDate(date: String) {
+    private fun updateCurrentDate(date: String) {
         _uiState.update {
             it.copy(
                 account = it.account.copy(dateOfCurrentBalance = date),
@@ -48,7 +79,7 @@ class EditAccountViewModel: ViewModel() {
         }
     }
 
-    fun updateAccountType(type: AccountType) {
+    private fun updateAccountType(type: AccountType) {
         _uiState.update {
             it.copy(
                 accountTypeMenuExpanded = false,
@@ -58,7 +89,7 @@ class EditAccountViewModel: ViewModel() {
         }
     }
 
-    fun updateBudgetType(budgetType: BudgetType) {
+    private fun updateBudgetType(budgetType: BudgetType) {
         _uiState.update {
             it.copy(
                 account = it.account.copy(selectedBudget = budgetType),
@@ -67,7 +98,7 @@ class EditAccountViewModel: ViewModel() {
         }
     }
 
-    fun updateAccountTypeExpanded(isExpanded: Boolean) {
+    private fun updateAccountTypeExpanded(isExpanded: Boolean) {
         _uiState.update {
             it.copy(
                 accountTypeMenuExpanded = isExpanded
@@ -75,7 +106,7 @@ class EditAccountViewModel: ViewModel() {
         }
     }
 
-    fun createAccount(onValidated: (Boolean) -> Unit) {
+    private fun createAccount(onValidated: (Boolean) -> Unit) {
         // Валидация всех полей
         _uiState.update {
             it.copy(
@@ -107,6 +138,7 @@ class EditAccountViewModel: ViewModel() {
             selectedBudget = null,
             selectedAccountType = AccountType.NONE
         ),
+        val deleteDialogOpened: Boolean = false,
         val nameError: String? = null,
         val currentBalanceError: String? = null,
         val dateOfCurrentBalanceError: String? = null,

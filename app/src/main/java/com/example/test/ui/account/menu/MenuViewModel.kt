@@ -15,10 +15,16 @@ class MenuViewModel(
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-    fun updateActiveAccount(accountId: Int) = viewModelScope.launch {
+    fun handle(intent: MenuIntent) {
+        when (intent) {
+            is MenuIntent.UpdateActiveAccount -> updateActiveAccount(intent.accountId)
+        }
+    }
+
+    private fun updateActiveAccount(accountId: Int) = viewModelScope.launch {
         _uiState.update {
             it.copy(
-               accountName = getAccountById(accountId)?.name
+                accountName = getAccountById(accountId)?.name
             )
         }
     }

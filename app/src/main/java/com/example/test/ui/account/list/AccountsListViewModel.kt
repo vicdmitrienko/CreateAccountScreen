@@ -4,11 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.test.data.database.daos.AccountDao
 import com.example.test.data.database.entities.Account
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -16,60 +13,78 @@ class AccountsListViewModel(private val dao: AccountDao) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    
-    private var getAccountsJob: Job? = null
 
     init {
         getAccounts()
     }
 
-    fun addAccount(account: Account) {
-        viewModelScope.launch {
-            insertAcc(account = account)
+    fun handle(intent: AccountsIntent) {
+        when (intent) {
+            is AccountsIntent.AddAccount -> addAccount(intent.account)
+            is AccountsIntent.DeleteAccount -> deleteAccount(intent.account)
+            is AccountsIntent.UpdateAccount -> updateAccount(intent.account)
         }
     }
 
-    fun editAccount(account: Account){
+    private fun addAccount(account: Account) {
         viewModelScope.launch {
-            updateAcc(account = account)
+            startLoading()
+            insertAccDao(account = account)
+            endLoading()
         }
     }
 
-    fun deleteAccount(account: Account){
+    private fun updateAccount(account: Account) {
         viewModelScope.launch {
-            deleteAcc(account = account)
+            startLoading()
+            updateAccDao(account = account)
+            endLoading()
+        }
+    }
+
+    private fun deleteAccount(account: Account) {
+        viewModelScope.launch {
+            startLoading()
+            deleteAccDao(account = account)
+            endLoading()
         }
     }
 
     private fun getAccounts() {
-        getAccountsJob?.cancel()
-
-        //TODO: Почему не collect?
-        getAccountsJob = getAccountsAsFlow().onEach { accounts ->
-            _uiState.update {
-                it.copy(
-                    accounts = accounts
-                )
+        viewModelScope.launch {
+            getAccountsAsFlow().collect { accounts ->
+                _uiState.update {
+                    it.copy(
+                        accounts = accounts
+                    )
+                }
             }
-            
-        }.launchIn(viewModelScope)
+        }
     }
 
+    private fun startLoading() {
+        _uiState.update { it.copy(isLoading = true) }
+    }
+
+    private fun endLoading() {
+        _uiState.update { it.copy(isLoading = false) }
+    }
 
     data class UiState(
-        val accounts: List<Account> = emptyList()
+        val accounts: List<Account> = emptyList(),
+        val isLoading: Boolean = false,
+        val error: String? = null
     )
-
 
     private fun getAccountsAsFlow() =
         dao.getAllAsFlow()
 
-    private suspend fun insertAcc(account: Account) =
+    private suspend fun insertAccDao(account: Account) =
         dao.insert(accountData = account)
 
-    private suspend fun updateAcc(account: Account) =
+    private suspend fun updateAccDao(account: Account) =
         dao.update(accountData = account)
 
-    private suspend fun deleteAcc(account: Account) =
+    private suspend fun deleteAccDao(account: Account) =
         dao.delete(accountData = account)
 }
